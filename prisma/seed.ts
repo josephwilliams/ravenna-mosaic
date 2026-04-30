@@ -123,7 +123,19 @@ async function main() {
   });
   await prisma.cardTag.createMany({ data: [{ cardId: c8.id, tagId: tagSmallfolk.id }] });
 
-  console.log("Seeded: The Small Council — 4 columns, 8 cards, 5 tags");
+  // Comments
+  await prisma.comment.createMany({
+    data: [
+      { cardId: c1.id, author: "Grand Maester Orwyle", content: "I have consulted the histories. The last sighting of this nature preceded the Doom by a fortnight. I advise caution.", },
+      { cardId: c1.id, author: "Ser Criston Cole", content: "Give me twenty men and I will handle it.", },
+      { cardId: c1.id, author: "Lord Larys Strong", content: "Perhaps we should first ask ourselves who benefits from a dragon so conveniently close to the capital.", },
+      { cardId: c5.id, author: "Otto Hightower", content: "Lord Celtigar has expressed interest. His accounts are... creative, but thorough.", },
+      { cardId: c5.id, author: "Rhaenyra Targaryen", content: "We need someone who won't mysteriously fall from a height. A lower office might help.", },
+      { cardId: c2.id, author: "Lord Lyonel Strong", content: "I have reviewed the prior rulings. They are contradictory. We may need to send a delegation.", },
+    ],
+  });
+
+  console.log("Seeded: The Small Council — 4 columns, 8 cards, 5 tags, 6 comments");
 }
 
 main()

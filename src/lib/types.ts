@@ -6,6 +6,13 @@ export interface TagData {
   color: string;
 }
 
+export interface CommentData {
+  id: string;
+  author: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface CardData {
   id: string;
   title: string;
@@ -13,6 +20,7 @@ export interface CardData {
   priority: Priority;
   position: number;
   tags: { tag: TagData }[];
+  _count?: { comments: number };
 }
 
 export interface ColumnData {

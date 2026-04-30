@@ -23,13 +23,15 @@ interface TileProps {
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-export function Tile({ children, className = "", style }: TileProps) {
+export function Tile({ children, className = "", style, onClick }: TileProps) {
   return (
     <div
       className={`relative bg-white border border-parchment-200 rounded-tile shadow-tile hover:shadow-tile-hover hover:-translate-y-0.5 hover:border-parchment-300 hover:z-10 transition-all duration-200 ease-out-expo ${className}`}
       style={style}
+      onClick={onClick}
     >
       {children}
     </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Settings, MessageSquare } from "lucide-react";
 import type { CardData } from "@/lib/types";
 import { Tile } from "./Surface";
 import { PriorityBadge, PriorityBar } from "./PriorityBadge";
@@ -16,12 +17,20 @@ interface CardProps extends CardData {
 
 export function Card({ index, boardId, columnId, ...card }: CardProps) {
   const [editing, setEditing] = useState(false);
+  const router = useRouter();
+  const commentCount = card._count?.comments ?? 0;
+
+  function handleCardClick(e: React.MouseEvent) {
+    if ((e.target as HTMLElement).closest("button")) return;
+    router.push(`/cards/${card.id}`);
+  }
 
   return (
     <>
       <Tile
-        className="px-4 py-3 cursor-default animate-tile-in"
+        className="px-4 py-3 cursor-pointer animate-tile-in"
         style={{ animationDelay: `${index * 60}ms` }}
+        onClick={handleCardClick}
       >
         <PriorityBar priority={card.priority} />
 
@@ -46,13 +55,24 @@ export function Card({ index, boardId, columnId, ...card }: CardProps) {
           </p>
         )}
 
-        {card.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {card.tags.map(({ tag }) => (
-              <TagChip key={tag.id} name={tag.name} color={tag.color} />
-            ))}
-          </div>
-        )}
+        <div className="flex items-center justify-between mt-2">
+          {card.tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {card.tags.map(({ tag }) => (
+                <TagChip key={tag.id} name={tag.name} color={tag.color} />
+              ))}
+            </div>
+          ) : (
+            <div />
+          )}
+
+          {commentCount > 0 && (
+            <div className="flex items-center gap-1 text-parchment-400">
+              <MessageSquare size={12} strokeWidth={1.5} />
+              <span className="text-[10px] font-body font-medium">{commentCount}</span>
+            </div>
+          )}
+        </div>
       </Tile>
 
       <EditCardModal
