@@ -11,65 +11,87 @@ async function main() {
   await prisma.board.deleteMany();
 
   const board = await prisma.board.create({
-    data: { title: "Project Board" },
+    data: { title: "The Small Council" },
   });
 
-  const backlog = await prisma.column.create({
-    data: { boardId: board.id, title: "Backlog", position: 0 },
+  const petitions = await prisma.column.create({
+    data: { boardId: board.id, title: "Petitions", position: 0 },
   });
 
-  const inProgress = await prisma.column.create({
-    data: { boardId: board.id, title: "In Progress", position: 1 },
+  const inCouncil = await prisma.column.create({
+    data: { boardId: board.id, title: "In Council", position: 1 },
   });
 
-  await prisma.column.create({
-    data: { boardId: board.id, title: "Review", position: 2 },
+  const awaitingCrown = await prisma.column.create({
+    data: { boardId: board.id, title: "Awaiting the Crown", position: 2 },
   });
 
-  await prisma.column.create({
-    data: { boardId: board.id, title: "Done", position: 3 },
+  const decreed = await prisma.column.create({
+    data: { boardId: board.id, title: "Decreed", position: 3 },
   });
 
   await prisma.card.createMany({
     data: [
       {
-        columnId: backlog.id,
-        title: "Set up authentication",
-        description: "Add NextAuth with GitHub provider",
+        columnId: petitions.id,
+        title: "Investigate dragon sightings near the Kingswood",
+        description: "Smallfolk report scorched fields and missing livestock. Likely a stray from Dragonstone, but could be worse.",
         position: 0,
         priority: "HIGH",
       },
       {
-        columnId: backlog.id,
-        title: "Design landing page",
-        description: "Create wireframes and mockups",
+        columnId: petitions.id,
+        title: "Settle the Bracken-Blackwood border dispute (again)",
+        description: "Both houses claim the river fork. This is the fourth petition this year.",
         position: 1,
         priority: "MEDIUM",
       },
       {
-        columnId: backlog.id,
-        title: "Write API documentation",
+        columnId: petitions.id,
+        title: "Ratify new tariffs on Essosi silk imports",
+        description: "The Guilds are complaining. The Crown needs the revenue. Someone has to do the arithmetic.",
         position: 2,
         priority: "LOW",
       },
       {
-        columnId: backlog.id,
-        title: "Add search functionality",
-        description: "Full-text search across cards",
+        columnId: petitions.id,
+        title: "Address smallfolk complaints about the tourney grounds",
+        description: "Apparently the last melee destroyed three market stalls and a tavern.",
         position: 3,
+        priority: "LOW",
+      },
+      {
+        columnId: inCouncil.id,
+        title: "Find replacement Master of Coin",
+        description: "The previous one met an unfortunate end involving a balcony. Applications are understandably slow.",
+        position: 0,
+        priority: "HIGH",
+      },
+      {
+        columnId: inCouncil.id,
+        title: "Repair the King's Road south of the Crossroads",
+        description: "Bandits, potholes, and at least one collapsed bridge. The merchants are routing through the Neck instead.",
+        position: 1,
         priority: "MEDIUM",
       },
       {
-        columnId: inProgress.id,
-        title: "Build kanban board UI",
-        description: "Drag and drop columns and cards",
+        columnId: awaitingCrown.id,
+        title: "Commission new tapestries for the Great Hall",
+        description: "The old ones depict a dynasty we're pretending never existed.",
         position: 0,
-        priority: "HIGH",
+        priority: "MEDIUM",
+      },
+      {
+        columnId: decreed.id,
+        title: "Hire a new Hand's tournament master of ceremonies",
+        description: "Done. Ser Gareth of Oldtown accepted. Gods help him.",
+        position: 0,
+        priority: "LOW",
       },
     ],
   });
 
-  console.log("Seeded: 1 board, 4 columns, 5 cards");
+  console.log("Seeded: The Small Council — 4 columns, 8 cards");
 }
 
 main()
