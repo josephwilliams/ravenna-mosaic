@@ -1,14 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
+import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import { Flame, Plus, BookOpen, Archive } from "lucide-react";
-import type { BoardData } from "@/lib/types";
+import type { BoardData, ColumnData, CardData } from "@/lib/types";
 import { Column } from "./Column";
 import { CreateCardModal } from "./CreateCardModal";
 
-export function Board({ id, title, columns }: BoardData) {
+export function Board({ id, title, columns: initialColumns }: BoardData) {
+  const [columns, setColumns] = useState(initialColumns);
   const [modalOpen, setModalOpen] = useState(false);
+
+  const onDragEnd = useCallback(
+    async (result: DropResult) => {
+      const { source, destination, draggableId } = result;
+      if (!destination) return;
+      if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+      // Optimistic update
+      const newColumns = columns.map((col) => ({ ...col, cards: [...col.cards] }));
+      const sourceCol = newColumns.find((c) => c.id === source.droppableId)!;
+      const destCol = newColumns.find((c) => c.id === destination.droppableId)!;
+
+      const [moved] = sourceCol.cards.splice(source.index, 1);
+      destCol.cards.splice(destination.index, 0, moved);
+
+      // Recalculate positions
+      sourceCol.cards.forEach((c, i) => (c.position = i));
+      destCol.cards.forEach((c, i) => (c.position = i));
+
+      setColumns(newColumns);
+
+      // Persist
+      await fetch(`/api/cards/${draggableId}/move`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          columnId: destination.droppableId,
+          position: destination.index,
+        }),
+      });
+    },
+    [columns]
+  );
 
   return (
     <div className="h-full flex flex-col">
@@ -54,11 +89,13 @@ export function Board({ id, title, columns }: BoardData) {
       </header>
 
       <main className="flex-1 overflow-x-auto px-8 pb-8">
-        <div className="flex gap-5 h-full">
-          {columns.map((col, i) => (
-            <Column key={col.id} {...col} index={i} boardId={id} />
-          ))}
-        </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-5 h-full">
+            {columns.map((col, i) => (
+              <Column key={col.id} {...col} index={i} boardId={id} />
+            ))}
+          </div>
+        </DragDropContext>
       </main>
 
       <CreateCardModal
