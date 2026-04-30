@@ -78,12 +78,12 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--parchment-300) transparent;
+  scrollbar-color: #d9cebb transparent;
 }
 
 body {
-  background: var(--parchment-50);
-  color: var(--parchment-800);
+  background: #faf7f2;
+  color: #4a3d30;
   font-family: var(--font-body), system-ui, sans-serif;
   overflow: hidden;
 }
