@@ -10,8 +10,10 @@ export default async function Home() {
           cards: {
             where: { deletedAt: null },
             orderBy: { position: "asc" },
+            take: 5,
             include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
           },
+          _count: { select: { cards: { where: { deletedAt: null } } } },
         },
       },
     },
@@ -27,5 +29,10 @@ export default async function Home() {
     );
   }
 
-  return <Board id={board.id} title={board.title} columns={board.columns} />;
+  const columns = board.columns.map((col) => ({
+    ...col,
+    totalCards: col._count.cards,
+  }));
+
+  return <Board id={board.id} title={board.title} columns={columns} />;
 }

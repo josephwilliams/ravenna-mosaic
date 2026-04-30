@@ -3,14 +3,21 @@ import { NextRequest } from "next/server";
 import { success, created, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: RouteContext<"/api/boards/[boardId]/columns/[columnId]/cards">
 ) {
   try {
     const { columnId } = await ctx.params;
+    const { searchParams } = req.nextUrl;
+    const skip = parseInt(searchParams.get("skip") ?? "0", 10) || 0;
+    const take = parseInt(searchParams.get("take") ?? "50", 10) || 50;
+
     const cards = await prisma.card.findMany({
       where: { columnId, deletedAt: null },
       orderBy: { position: "asc" },
+      skip,
+      take,
+      include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
     });
     return success(cards);
   } catch (err) {

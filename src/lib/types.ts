@@ -28,6 +28,7 @@ export interface ColumnData {
   title: string;
   position: number;
   cards: CardData[];
+  totalCards: number;
 }
 
 export interface BoardData {

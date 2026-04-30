@@ -26,8 +26,10 @@ export async function GET(
             cards: {
               where: cardWhere,
               orderBy: { position: "asc" },
+              take: 5,
               include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
             },
+            _count: { select: { cards: { where: { deletedAt: null } } } },
           },
         },
       },

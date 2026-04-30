@@ -93,6 +93,30 @@ describe("GET /cards", () => {
     expect(status).toBe(200);
     expect(body.data.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("paginates with skip and take", async () => {
+    for (let i = 0; i < 6; i++) {
+      await createTestCard(colAId, { title: `Page ${i}`, position: 10 + i });
+    }
+
+    const first = await apiCall(
+      LIST,
+      buildRequest(`/api/boards/${boardId}/columns/${colAId}/cards`, { searchParams: { take: "3", skip: "0" } }),
+      { boardId, columnId: colAId }
+    );
+    expect(first.status).toBe(200);
+    expect(first.body.data.length).toBe(3);
+
+    const second = await apiCall(
+      LIST,
+      buildRequest(`/api/boards/${boardId}/columns/${colAId}/cards`, { searchParams: { take: "3", skip: "3" } }),
+      { boardId, columnId: colAId }
+    );
+    expect(second.status).toBe(200);
+    expect(second.body.data.length).toBe(3);
+
+    expect(first.body.data[0].id).not.toBe(second.body.data[0].id);
+  });
 });
 
 describe("GET /cards/[cardId]", () => {

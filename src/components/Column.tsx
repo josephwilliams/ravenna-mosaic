@@ -1,7 +1,7 @@
 "use client";
 
 import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { Settings } from "lucide-react";
+import { Settings, ChevronDown } from "lucide-react";
 import type { ColumnData } from "@/lib/types";
 import { Surface } from "./Surface";
 import { Card } from "./Card";
@@ -10,9 +10,12 @@ interface ColumnProps extends ColumnData {
   index: number;
   boardId: string;
   onEdit: (col: { id: string; title: string; cardCount: number }) => void;
+  onLoadMore: (columnId: string, skip: number) => void;
 }
 
-export function Column({ id, title, cards, index, boardId, onEdit }: ColumnProps) {
+export function Column({ id, title, cards, totalCards, index, boardId, onEdit, onLoadMore }: ColumnProps) {
+  const hasMore = cards.length < totalCards;
+
   return (
     <Draggable draggableId={`col-${id}`} index={index}>
       {(colProvided) => (
@@ -36,10 +39,10 @@ export function Column({ id, title, cards, index, boardId, onEdit }: ColumnProps
                 </h2>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-body font-medium text-parchment-400 tabular-nums">
-                    {cards.length}
+                    {totalCards}
                   </span>
                   <button
-                    onClick={() => onEdit({ id, title, cardCount: cards.length })}
+                    onClick={() => onEdit({ id, title, cardCount: totalCards })}
                     className="text-parchment-400 hover:text-parchment-700 transition-colors"
                   >
                     <Settings size={12} strokeWidth={1.5} />
@@ -63,6 +66,16 @@ export function Column({ id, title, cards, index, boardId, onEdit }: ColumnProps
                   ))}
 
                   {provided.placeholder}
+
+                  {hasMore && (
+                    <button
+                      onClick={() => onLoadMore(id, cards.length)}
+                      className="flex items-center justify-center gap-1 w-full py-2 text-xs font-body font-medium text-parchment-400 hover:text-terracotta transition-colors"
+                    >
+                      <ChevronDown size={12} strokeWidth={1.5} />
+                      Show more ({totalCards - cards.length})
+                    </button>
+                  )}
 
                   {cards.length === 0 && !snapshot.isDraggingOver && (
                     <div className="flex items-center justify-center py-12 text-parchment-400 text-xs font-body italic">

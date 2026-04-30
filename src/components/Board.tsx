@@ -93,6 +93,18 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
     setGroupByUrgency(false);
   }
 
+  async function loadMore(columnId: string, skip: number) {
+    const res = await fetch(`/api/boards/${id}/columns/${columnId}/cards?skip=${skip}&take=5`);
+    const { data } = await res.json();
+    setColumns((prev) =>
+      prev.map((col) =>
+        col.id === columnId
+          ? { ...col, cards: [...col.cards, ...data] }
+          : col
+      )
+    );
+  }
+
   const onDragEnd = useCallback(
     async (result: DropResult) => {
       const { source, destination, draggableId, type } = result;
@@ -141,6 +153,11 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
       sourceCol.cards.forEach((c, i) => (c.position = i));
       destCol.cards.forEach((c, i) => (c.position = i));
+
+      if (sourceCol.id !== destCol.id) {
+        sourceCol.totalCards--;
+        destCol.totalCards++;
+      }
 
       setColumns(newColumns);
 
@@ -242,7 +259,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
                 className="flex gap-5 h-full after:shrink-0 after:w-px after:content-['']"
               >
                 {filteredColumns.map((col, i) => (
-                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} />
+                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} onLoadMore={loadMore} />
                 ))}
                 {provided.placeholder}
               </div>

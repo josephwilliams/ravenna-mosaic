@@ -48,6 +48,11 @@ const entries: Entry[] = [
     title: "Logging",
     body: "Wanted a decorator pattern. withLogging wrapping each route handler, reusable for Sentry, PostHog, whatever analytics. Ended up using Next.js middleware instead since it's one file for all routes. The decorator idea still holds for per-handler concerns. Worth noting: Vercel swallows console.log in prod, so this would need a real transport (PostHog, Sentry, Axiom) to be useful beyond local dev.",
   },
+  {
+    commit: "Commit 15",
+    title: "Pagination",
+    body: "Went with offset/limit (skip/take) pagination on column cards. Columns load 5 cards initially with a 'show more' button to fetch the next 5. Considered cursor-based pagination but it's overkill here. No infinite scroll, no virtual lists. The board is a kanban, not a feed. If a column has 50 cards you have bigger problems than pagination strategy.",
+  },
 ];
 
 export default function PonderingsPage() {
