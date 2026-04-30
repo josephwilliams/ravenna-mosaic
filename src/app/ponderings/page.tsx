@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { backLinkClass } from "@/lib/styles";
+import { PonderingEntry } from "@/components/PonderingEntry";
 
 interface Entry {
   commit: string;
@@ -60,11 +62,9 @@ export default function PonderingsPage() {
     <div className="h-full overflow-y-auto bg-parchment-50">
       <div className="max-w-2xl mx-auto px-8 py-16">
         <header className="mb-12 animate-fade-in">
-          <Link
-            href="/"
-            className="text-xs font-body font-medium text-parchment-400 hover:text-terracotta transition-colors"
-          >
-            &larr; Back to the board
+          <Link href="/" className={backLinkClass}>
+            <ArrowLeft size={13} strokeWidth={1.5} />
+            Back to the board
           </Link>
 
           <h1 className="font-display text-3xl font-semibold text-parchment-800 mt-6">
@@ -78,26 +78,7 @@ export default function PonderingsPage() {
 
         <div className="space-y-10">
           {entries.map((entry, i) => (
-            <article
-              key={entry.commit}
-              className="animate-slide-up"
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-[10px] font-body font-semibold uppercase tracking-[0.12em] text-parchment-400">
-                  {entry.commit}
-                </span>
-                <div className="h-px flex-1 bg-parchment-200" />
-              </div>
-
-              <h2 className="font-display text-lg font-semibold text-parchment-800 mb-2">
-                {entry.title}
-              </h2>
-
-              <p className="font-body text-sm text-parchment-600 leading-relaxed">
-                {entry.body}
-              </p>
-            </article>
+            <PonderingEntry key={entry.commit} {...entry} index={i} />
           ))}
         </div>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { backLinkClass } from "@/lib/styles";
 import { notFound } from "next/navigation";
 import { PriorityBadge } from "@/components/PriorityBadge";
 import { TagChip } from "@/components/TagChip";
@@ -28,10 +29,7 @@ export default async function CardDetailPage({
     <div className="h-full overflow-y-auto">
       <div className="max-w-2xl mx-auto px-8 py-16">
         <header className="mb-10 animate-fade-in">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-400 hover:text-terracotta transition-colors"
-          >
+          <Link href="/" className={backLinkClass}>
             <ArrowLeft size={13} strokeWidth={1.5} />
             Back to {card.column.board.title}
           </Link>

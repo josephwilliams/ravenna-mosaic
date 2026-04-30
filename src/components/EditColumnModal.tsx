@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { Modal } from "./Modal";
+import { inputClass, btnPrimary, btnSecondary } from "@/lib/styles";
+import { fetchJSON } from "@/lib/fetch";
+import { Modal, ModalHeader } from "./Modal";
 
 interface EditColumnModalProps {
   open: boolean;
@@ -25,11 +27,7 @@ export function EditColumnModal({ open, onClose, boardId, column, onUpdated }: E
     if (!title.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(endpoint, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim() }),
-      });
+      const res = await fetchJSON(endpoint, { method: "PATCH", body: { title: title.trim() } });
       if (res.ok) {
         onClose();
         onUpdated();
@@ -42,7 +40,7 @@ export function EditColumnModal({ open, onClose, boardId, column, onUpdated }: E
   async function handleDelete() {
     setLoading(true);
     try {
-      const res = await fetch(endpoint, { method: "DELETE" });
+      const res = await fetchJSON(endpoint, { method: "DELETE" });
       if (res.ok) {
         onClose();
         onUpdated();
@@ -54,9 +52,7 @@ export function EditColumnModal({ open, onClose, boardId, column, onUpdated }: E
 
   return (
     <Modal open={open} onClose={onClose}>
-      <h2 className="font-display text-xl font-semibold text-parchment-800 mb-6">
-        Edit Column
-      </h2>
+      <ModalHeader title="Edit Column" />
 
       <form onSubmit={handleSave} className="space-y-4">
         <input
@@ -64,7 +60,7 @@ export function EditColumnModal({ open, onClose, boardId, column, onUpdated }: E
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           autoFocus
-          className="w-full bg-white border border-parchment-200 rounded-tile px-4 py-2.5 text-sm font-body text-parchment-800 placeholder:text-parchment-400 focus:outline-none focus:border-parchment-400 focus:ring-1 focus:ring-parchment-300 transition-colors"
+          className={inputClass}
         />
 
         <div className="flex items-center justify-between pt-2">
@@ -96,18 +92,10 @@ export function EditColumnModal({ open, onClose, boardId, column, onUpdated }: E
           )}
 
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-body font-medium text-parchment-500 hover:text-parchment-700 transition-colors"
-            >
+            <button type="button" onClick={onClose} className={btnSecondary}>
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={!title.trim() || loading}
-              className="px-5 py-2 text-xs font-body font-semibold text-parchment-50 bg-parchment-800 rounded-tile hover:bg-parchment-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
+            <button type="submit" disabled={!title.trim() || loading} className={btnPrimary}>
               {loading ? "Saving..." : "Save"}
             </button>
           </div>

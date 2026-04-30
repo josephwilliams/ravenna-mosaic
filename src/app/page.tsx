@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cardInclude } from "@/lib/queries";
 import { Board } from "@/components/Board";
 
 export default async function Home() {
@@ -11,7 +12,7 @@ export default async function Home() {
             where: { deletedAt: null },
             orderBy: { position: "asc" },
             take: 5,
-            include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
+            include: cardInclude,
           },
           _count: { select: { cards: { where: { deletedAt: null } } } },
         },

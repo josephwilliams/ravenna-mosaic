@@ -5,6 +5,8 @@ import Link from "next/link";
 import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
 import { Flame, Plus, Columns3, BookOpen, Archive, Tag } from "lucide-react";
 import type { BoardData, ColumnData, CardData, Priority, TagData } from "@/lib/types";
+import { navItemClass } from "@/lib/styles";
+import { fetchJSON } from "@/lib/fetch";
 import { Column } from "./Column";
 import { CreateCardModal } from "./CreateCardModal";
 import { CreateColumnModal } from "./CreateColumnModal";
@@ -79,10 +81,9 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
     await Promise.all(
       sorted.map((col) =>
-        fetch(`/api/boards/${id}/columns/${col.id}/cards/reorder`, {
+        fetchJSON(`/api/boards/${id}/columns/${col.id}/cards/reorder`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cardIds: col.cards.map((c) => c.id) }),
+          body: { cardIds: col.cards.map((c) => c.id) },
         })
       )
     );
@@ -95,8 +96,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
   }
 
   async function loadMore(columnId: string, skip: number) {
-    const res = await fetch(`/api/boards/${id}/columns/${columnId}/cards?skip=${skip}&take=5`);
-    const { data } = await res.json();
+    const { data } = await fetchJSON<CardData[]>(`/api/boards/${id}/columns/${columnId}/cards?skip=${skip}&take=5`);
     setColumns((prev) =>
       prev.map((col) =>
         col.id === columnId
@@ -119,13 +119,9 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         newColumns.forEach((c, i) => (c.position = i));
         setColumns(newColumns);
 
-        await fetch(`/api/boards/${id}/columns/reorder`, {
+        await fetchJSON(`/api/boards/${id}/columns/reorder`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            columnId: moved.id,
-            position: destination.index,
-          }),
+          body: { columnId: moved.id, position: destination.index },
         });
         return;
       }
@@ -162,13 +158,9 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
       setColumns(newColumns);
 
-      await fetch(`/api/cards/${draggableId}/move`, {
+      await fetchJSON(`/api/cards/${draggableId}/move`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          columnId: destination.droppableId,
-          position: moved.position,
-        }),
+        body: { columnId: destination.droppableId, position: moved.position },
       });
     },
     [columns, id, hasFilters, activePriorities, activeTagIds]
@@ -187,7 +179,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <button
             onClick={() => { setModalColumnId(undefined); setModalOpen(true); }}
-            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className={navItemClass}
           >
             <Plus size={13} strokeWidth={2} />
             New Card
@@ -195,7 +187,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <button
             onClick={() => setColModalOpen(true)}
-            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className={navItemClass}
           >
             <Columns3 size={13} strokeWidth={1.5} />
             New Column
@@ -203,7 +195,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <button
             onClick={() => setTagsOpen(true)}
-            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className={navItemClass}
           >
             <Tag size={13} strokeWidth={1.5} />
             Tags
@@ -211,7 +203,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <Link
             href="/archive"
-            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className={navItemClass}
           >
             <Archive size={13} strokeWidth={1.5} />
             Archive
@@ -219,7 +211,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <Link
             href="/ponderings"
-            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className={navItemClass}
           >
             <BookOpen size={13} strokeWidth={1.5} />
             Ponderings

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { CommentData } from "@/lib/types";
+import { inputClass, btnPrimary } from "@/lib/styles";
+import { fetchJSON } from "@/lib/fetch";
 import { Tile } from "./Surface";
 
 interface CommentSectionProps {
@@ -20,14 +22,12 @@ export function CommentSection({ cardId, initialComments }: CommentSectionProps)
     if (!content.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/cards/${cardId}/comments`, {
+      const res = await fetchJSON<CommentData>(`/api/cards/${cardId}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: content.trim() }),
+        body: { content: content.trim() },
       });
       if (res.ok) {
-        const { data: comment } = await res.json();
-        setComments((prev) => [...prev, comment]);
+        setComments((prev) => [...prev, res.data]);
         setContent("");
       }
     } finally {
@@ -36,7 +36,7 @@ export function CommentSection({ cardId, initialComments }: CommentSectionProps)
   }
 
   async function handleDelete(commentId: string) {
-    const res = await fetch(`/api/comments/${commentId}`, { method: "DELETE" });
+    const res = await fetchJSON(`/api/comments/${commentId}`, { method: "DELETE" });
     if (res.ok) {
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     }
@@ -50,9 +50,6 @@ export function CommentSection({ cardId, initialComments }: CommentSectionProps)
       minute: "2-digit",
     });
   }
-
-  const inputClass =
-    "w-full bg-white border border-parchment-200 rounded-tile px-4 py-2.5 text-sm font-body text-parchment-800 placeholder:text-parchment-400 focus:outline-none focus:border-parchment-400 focus:ring-1 focus:ring-parchment-300 transition-colors";
 
   return (
     <section>
@@ -113,11 +110,7 @@ export function CommentSection({ cardId, initialComments }: CommentSectionProps)
           className={`${inputClass} resize-none`}
         />
         <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={!content.trim() || loading}
-            className="px-5 py-2 text-xs font-body font-semibold text-parchment-50 bg-parchment-800 rounded-tile hover:bg-parchment-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
+          <button type="submit" disabled={!content.trim() || loading} className={btnPrimary}>
             {loading ? "Posting..." : "Post Remark"}
           </button>
         </div>

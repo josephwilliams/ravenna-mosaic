@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cardInclude } from "@/lib/queries";
 import { NextRequest } from "next/server";
 import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
 
@@ -27,7 +28,7 @@ export async function GET(
               where: cardWhere,
               orderBy: { position: "asc" },
               take: 5,
-              include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
+              include: cardInclude,
             },
             _count: { select: { cards: { where: { deletedAt: null } } } },
           },

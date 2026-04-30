@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { TagData } from "@/lib/types";
+import { fetchJSON } from "@/lib/fetch";
 
 interface TagPickerProps {
   selected: string[];
@@ -12,9 +13,9 @@ export function TagPicker({ selected, onChange }: TagPickerProps) {
   const [tags, setTags] = useState<TagData[]>([]);
 
   useEffect(() => {
-    fetch("/api/tags")
-      .then((r) => r.json())
-      .then((res) => setTags(res.data.map((t: TagData & { _count?: unknown }) => ({ id: t.id, name: t.name, color: t.color }))));
+    fetchJSON<(TagData & { _count?: unknown })[]>("/api/tags").then(({ data }) =>
+      setTags(data.map((t) => ({ id: t.id, name: t.name, color: t.color })))
+    );
   }, []);
 
   function toggle(tagId: string) {

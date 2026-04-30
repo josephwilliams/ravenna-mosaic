@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { Priority, CardData } from "@/lib/types";
-import { Modal } from "./Modal";
+import { inputClass, selectClass, priorities, btnPrimary, btnSecondary } from "@/lib/styles";
+import { fetchJSON } from "@/lib/fetch";
+import { Modal, ModalHeader } from "./Modal";
 import { TagPicker } from "./TagPicker";
 
 interface EditCardModalProps {
@@ -13,12 +15,6 @@ interface EditCardModalProps {
   boardId: string;
   columnId: string;
 }
-
-const priorities: { value: Priority; label: string }[] = [
-  { value: "HIGH", label: "High" },
-  { value: "MEDIUM", label: "Medium" },
-  { value: "LOW", label: "Low" },
-];
 
 export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCardModalProps) {
   const [title, setTitle] = useState(card.title);
@@ -36,20 +32,11 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
     setLoading(true);
     try {
       const [cardRes, tagsRes] = await Promise.all([
-        fetch(endpoint, {
+        fetchJSON(endpoint, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: title.trim(),
-            description: description.trim() || null,
-            priority,
-          }),
+          body: { title: title.trim(), description: description.trim() || null, priority },
         }),
-        fetch(`/api/cards/${card.id}/tags`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tagIds }),
-        }),
+        fetchJSON(`/api/cards/${card.id}/tags`, { method: "PUT", body: { tagIds } }),
       ]);
       if (cardRes.ok && tagsRes.ok) {
         onClose();
@@ -63,7 +50,7 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
   async function handleDelete() {
     setLoading(true);
     try {
-      const res = await fetch(endpoint, { method: "DELETE" });
+      const res = await fetchJSON(endpoint, { method: "DELETE" });
       if (res.ok) {
         onClose();
         window.location.reload();
@@ -73,14 +60,9 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
     }
   }
 
-  const inputClass =
-    "w-full bg-white border border-parchment-200 rounded-tile px-4 py-2.5 text-sm font-body text-parchment-800 placeholder:text-parchment-400 focus:outline-none focus:border-parchment-400 focus:ring-1 focus:ring-parchment-300 transition-colors";
-
   return (
     <Modal open={open} onClose={onClose}>
-      <h2 className="font-display text-xl font-semibold text-parchment-800 mb-6">
-        Edit Card
-      </h2>
+      <ModalHeader title="Edit Card" />
 
       <form onSubmit={handleSave} className="space-y-4">
         <input
@@ -102,7 +84,7 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value as Priority)}
-          className="bg-white border border-parchment-200 rounded-tile px-3 py-2 text-sm font-body text-parchment-700 focus:outline-none focus:border-parchment-400 focus:ring-1 focus:ring-parchment-300 transition-colors"
+          className={selectClass}
         >
           {priorities.map((p) => (
             <option key={p.value} value={p.value}>{p.label}</option>
@@ -134,18 +116,10 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
           )}
 
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-body font-medium text-parchment-500 hover:text-parchment-700 transition-colors"
-            >
+            <button type="button" onClick={onClose} className={btnSecondary}>
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={!title.trim() || loading}
-              className="px-5 py-2 text-xs font-body font-semibold text-parchment-50 bg-parchment-800 rounded-tile hover:bg-parchment-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
+            <button type="submit" disabled={!title.trim() || loading} className={btnPrimary}>
               {loading ? "Saving..." : "Save"}
             </button>
           </div>

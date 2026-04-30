@@ -5,6 +5,7 @@ export function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
   const duration = Math.round(performance.now() - start);
+  // NOTE: console.log gets swallowed in production by Vercel.
   console.log(JSON.stringify({
     method: req.method,
     path: req.nextUrl.pathname,

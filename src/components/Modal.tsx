@@ -2,6 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { type ReactNode, useEffect, useRef, useState, useCallback } from "react";
+import { btnPrimary, btnSecondary } from "@/lib/styles";
 
 interface ModalProps {
   open: boolean;
@@ -80,5 +81,47 @@ export function Modal({ open, onClose, children }: ModalProps) {
       </div>
     </div>,
     document.body
+  );
+}
+
+interface ModalHeaderProps {
+  title: string;
+  description?: string;
+}
+
+export function ModalHeader({ title, description }: ModalHeaderProps) {
+  return (
+    <>
+      <h2 className={`font-display text-xl font-semibold text-parchment-800 ${description ? "mb-1" : "mb-6"}`}>
+        {title}
+      </h2>
+      {description && (
+        <p className="text-xs text-parchment-500 font-body mb-6">
+          {description}
+        </p>
+      )}
+    </>
+  );
+}
+
+interface ModalActionsProps {
+  cancelLabel?: string;
+  submitLabel: string;
+  loadingLabel?: string;
+  disabled?: boolean;
+  loading?: boolean;
+  onCancel: () => void;
+}
+
+export function ModalActions({ cancelLabel = "Cancel", submitLabel, loadingLabel, disabled, loading, onCancel }: ModalActionsProps) {
+  return (
+    <div className="flex justify-end gap-3 pt-2">
+      <button type="button" onClick={onCancel} className={btnSecondary}>
+        {cancelLabel}
+      </button>
+      <button type="submit" disabled={disabled || loading} className={btnPrimary}>
+        {loading && loadingLabel ? loadingLabel : submitLabel}
+      </button>
+    </div>
   );
 }

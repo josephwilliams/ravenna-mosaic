@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cardInclude } from "@/lib/queries";
 import { NextRequest } from "next/server";
 import { success, created, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
 
@@ -17,7 +18,7 @@ export async function GET(
       orderBy: { position: "asc" },
       skip,
       take,
-      include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
+      include: cardInclude,
     });
     return success(cards);
   } catch (err) {

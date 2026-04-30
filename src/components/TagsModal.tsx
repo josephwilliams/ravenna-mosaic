@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Trash2 } from "lucide-react";
-import { Modal } from "./Modal";
+import { inputClass, btnPrimary, btnSecondary } from "@/lib/styles";
+import { fetchJSON } from "@/lib/fetch";
+import { Modal, ModalHeader } from "./Modal";
 
 interface TagWithCount {
   id: string;
@@ -30,9 +32,7 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
 
   useEffect(() => {
     if (open) {
-      fetch("/api/tags")
-        .then((r) => r.json())
-        .then((res) => setTags(res.data));
+      fetchJSON<TagWithCount[]>("/api/tags").then(({ data }) => setTags(data));
     }
   }, [open]);
 
@@ -42,14 +42,12 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/tags", {
+      const res = await fetchJSON<TagWithCount>("/api/tags", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), color }),
+        body: { name: name.trim(), color },
       });
       if (res.ok) {
-        const { data: tag } = await res.json();
-        setTags((prev) => [...prev, { ...tag, _count: { cards: 0 } }].sort((a, b) => a.name.localeCompare(b.name)));
+        setTags((prev) => [...prev, { ...res.data, _count: { cards: 0 } }].sort((a, b) => a.name.localeCompare(b.name)));
         setName("");
       }
     } finally {
@@ -68,17 +66,9 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
     }
   }
 
-  const inputClass =
-    "w-full bg-white border border-parchment-200 rounded-tile px-4 py-2.5 text-sm font-body text-parchment-800 placeholder:text-parchment-400 focus:outline-none focus:border-parchment-400 focus:ring-1 focus:ring-parchment-300 transition-colors";
-
   return (
     <Modal open={open} onClose={onClose}>
-      <h2 className="font-display text-xl font-semibold text-parchment-800 mb-1">
-        Tags
-      </h2>
-      <p className="text-xs text-parchment-500 font-body mb-6">
-        Manage the sigils of the realm.
-      </p>
+      <ModalHeader title="Tags" description="Manage the sigils of the realm." />
 
       {error && (
         <div className="text-xs font-body text-terracotta bg-terracotta-soft rounded-tile px-3 py-2 mb-4">
@@ -142,18 +132,10 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-body font-medium text-parchment-500 hover:text-parchment-700 transition-colors"
-          >
+          <button type="button" onClick={onClose} className={btnSecondary}>
             Done
           </button>
-          <button
-            type="submit"
-            disabled={!name.trim() || loading}
-            className="px-5 py-2 text-xs font-body font-semibold text-parchment-50 bg-parchment-800 rounded-tile hover:bg-parchment-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
+          <button type="submit" disabled={!name.trim() || loading} className={btnPrimary}>
             {loading ? "Creating..." : "Add Tag"}
           </button>
         </div>

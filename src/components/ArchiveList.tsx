@@ -6,6 +6,7 @@ import { Tile } from "./Surface";
 import { PriorityBadge } from "./PriorityBadge";
 import { TagChip } from "./TagChip";
 import type { Priority, TagData } from "@/lib/types";
+import { fetchJSON } from "@/lib/fetch";
 
 interface ArchivedCard {
   id: string;
@@ -22,13 +23,9 @@ export function ArchiveList({ cards: initial }: { cards: ArchivedCard[] }) {
   const [cards, setCards] = useState(initial);
 
   async function restore(card: ArchivedCard) {
-    const res = await fetch(
+    const res = await fetchJSON(
       `/api/boards/${card.column.boardId}/columns/${card.columnId}/cards/${card.id}`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deletedAt: null }),
-      }
+      { method: "PATCH", body: { deletedAt: null } }
     );
     if (res.ok) {
       setCards((prev) => prev.filter((c) => c.id !== card.id));
