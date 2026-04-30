@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:migrate": "dotenv -e .env.local -- npx prisma migrate dev",
     "db:seed": "dotenv -e .env.local -- npx prisma db seed",
-    "db:studio": "dotenv -e .env.local -- npx prisma studio"
+    "db:studio": "dotenv -e .env.local -- npx prisma studio",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
@@ -28,11 +30,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
