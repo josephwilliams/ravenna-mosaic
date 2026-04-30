@@ -38,6 +38,11 @@ const entries: Entry[] = [
     title: "The Checklist",
     body: "Re-read the original requirements and realized we're missing tests and keyboard accessibility. Time to stop shipping features and shore up the foundation.",
   },
+  {
+    commit: "Commit 12",
+    title: "Grouping",
+    body: "Went with 'group by urgency' — sorts cards within each column by priority. Most obvious grouping mechanic. Grouping by tag could also work, or chronological sort by creation date. Another optimistic state change: UI reorders instantly, batch PATCH persists per column in the background.",
+  },
 ];
 
 export default function PonderingsPage() {

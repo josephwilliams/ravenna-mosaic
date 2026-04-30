@@ -21,6 +21,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [tagsOpen, setTagsOpen] = useState(false);
   const [activePriorities, setActivePriorities] = useState<Priority[]>([]);
   const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
+  const [groupByUrgency, setGroupByUrgency] = useState(false);
 
   const availableTags = useMemo(() => {
     const tagMap = new Map<string, TagData>();
@@ -60,9 +61,33 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
     );
   }
 
+  const priorityRank: Record<Priority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+
+  async function sortByUrgency() {
+    const sorted = columns.map((col) => ({
+      ...col,
+      cards: [...col.cards]
+        .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
+        .map((c, i) => ({ ...c, position: i })),
+    }));
+    setColumns(sorted);
+    setGroupByUrgency(true);
+
+    await Promise.all(
+      sorted.map((col) =>
+        fetch(`/api/boards/${id}/columns/${col.id}/cards/reorder`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cardIds: col.cards.map((c) => c.id) }),
+        })
+      )
+    );
+  }
+
   function clearFilters() {
     setActivePriorities([]);
     setActiveTagIds([]);
+    setGroupByUrgency(false);
   }
 
   const onDragEnd = useCallback(
@@ -194,8 +219,10 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
               availableTags={availableTags}
               activePriorities={activePriorities}
               activeTagIds={activeTagIds}
+              groupByUrgency={groupByUrgency}
               onTogglePriority={togglePriority}
               onToggleTag={toggleTag}
+              onToggleGroupByUrgency={sortByUrgency}
               onClear={clearFilters}
             />
           </div>

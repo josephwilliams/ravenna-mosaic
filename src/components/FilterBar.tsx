@@ -1,14 +1,16 @@
 "use client";
 
-import { Filter, X } from "lucide-react";
+import { Filter, ArrowDownUp, X } from "lucide-react";
 import type { Priority, TagData } from "@/lib/types";
 
 interface FilterBarProps {
   availableTags: TagData[];
   activePriorities: Priority[];
   activeTagIds: string[];
+  groupByUrgency: boolean;
   onTogglePriority: (p: Priority) => void;
   onToggleTag: (id: string) => void;
+  onToggleGroupByUrgency: () => void;
   onClear: () => void;
 }
 
@@ -22,11 +24,13 @@ export function FilterBar({
   availableTags,
   activePriorities,
   activeTagIds,
+  groupByUrgency,
   onTogglePriority,
   onToggleTag,
+  onToggleGroupByUrgency,
   onClear,
 }: FilterBarProps) {
-  const hasFilters = activePriorities.length > 0 || activeTagIds.length > 0;
+  const hasFilters = activePriorities.length > 0 || activeTagIds.length > 0 || groupByUrgency;
 
   return (
     <div className="flex items-center gap-4 flex-wrap overflow-x-auto">
@@ -86,6 +90,20 @@ export function FilterBar({
           </div>
         </>
       )}
+
+      <div className="w-px h-4 bg-parchment-200" />
+
+      <button
+        onClick={onToggleGroupByUrgency}
+        className={`flex items-center gap-1 text-[10px] font-body font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full transition-all duration-200 ${
+          groupByUrgency
+            ? "bg-parchment-800 text-white"
+            : "text-parchment-500 bg-parchment-100 hover:bg-parchment-200"
+        }`}
+      >
+        <ArrowDownUp size={10} strokeWidth={2} />
+        Urgency
+      </button>
 
       {hasFilters && (
         <button
