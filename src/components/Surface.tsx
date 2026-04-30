@@ -2,17 +2,18 @@
 
 import { type ReactNode } from "react";
 
-interface SurfaceProps {
+type SurfaceProps = {
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
-}
+} & Record<`data-${string}`, string | number>;
 
-export function Surface({ children, className = "", style }: SurfaceProps) {
+export function Surface({ children, className = "", style, ...rest }: SurfaceProps) {
   return (
     <div
       className={`bg-parchment-100 border border-parchment-200 shadow-surface rounded-surface ${className}`}
       style={style}
+      {...rest}
     >
       {children}
     </div>

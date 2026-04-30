@@ -39,7 +39,15 @@ export function Card({ index, boardId, columnId, ...card }: CardProps) {
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               onClick={handleCardClick}
-              className={`relative bg-white border rounded-tile shadow-tile cursor-pointer transition-all duration-200 ease-out-expo px-4 py-3 ${
+              data-card-index={index}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !(e.target as HTMLElement).closest("button")) {
+                  e.preventDefault();
+                  router.push(`/cards/${card.id}`);
+                }
+              }}
+              className={`relative bg-white border rounded-tile shadow-tile cursor-pointer transition-all duration-200 ease-out-expo px-4 py-3 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta ${
                 snapshot.isDragging
                   ? "shadow-tile-hover border-parchment-300 rotate-[1deg] scale-[1.02]"
                   : "border-parchment-200 hover:shadow-tile-hover hover:-translate-y-0.5 hover:border-parchment-300 hover:z-10"

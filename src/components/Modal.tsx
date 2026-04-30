@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState, useCallback } from "react";
 
 interface ModalProps {
   open: boolean;
@@ -11,17 +11,71 @@ interface ModalProps {
 
 export function Modal({ open, onClose, children }: ModalProps) {
   const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<Element | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement;
+      requestAnimationFrame(() => {
+        const first = dialogRef.current?.querySelector<HTMLElement>(
+          "input, textarea, select, button[type='submit'], [tabindex]:not([tabindex='-1'])"
+        );
+        first?.focus();
+      });
+    } else if (previousFocusRef.current instanceof HTMLElement) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
+  }, [open]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          "input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex='-1'])"
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    },
+    [onClose]
+  );
+
   if (!open || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-40 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      onKeyDown={handleKeyDown}
+    >
       <div className="absolute inset-0 bg-parchment-900/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-parchment-50 border border-parchment-200 rounded-surface shadow-tile-hover p-8 w-full max-w-md animate-slide-up">
+      <div
+        ref={dialogRef}
+        className="relative bg-parchment-50 border border-parchment-200 rounded-surface shadow-tile-hover p-8 w-full max-w-md animate-slide-up"
+      >
         {children}
       </div>
     </div>,

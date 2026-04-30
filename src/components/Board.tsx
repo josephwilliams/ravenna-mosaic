@@ -12,6 +12,7 @@ import { EditColumnModal } from "./EditColumnModal";
 import { TagsModal } from "./TagsModal";
 import { FilterBar } from "./FilterBar";
 import { MobileNav } from "./MobileNav";
+import { useBoardKeyboard } from "@/hooks/useBoardKeyboard";
 
 export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
@@ -48,6 +49,8 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
       }),
     }));
   }, [columns, activePriorities, activeTagIds, hasFilters]);
+
+  useBoardKeyboard(filteredColumns);
 
   function togglePriority(p: Priority) {
     setActivePriorities((prev) =>

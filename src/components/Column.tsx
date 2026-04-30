@@ -24,6 +24,7 @@ export function Column({ id, title, cards, index, boardId, onEdit }: ColumnProps
           <Surface
             className="flex flex-col min-w-[300px] max-w-[340px] w-[340px] animate-slide-up"
             style={{ animationDelay: `${index * 80}ms` }}
+            data-column-index={index}
           >
             <div
               {...colProvided.dragHandleProps}
