@@ -10,6 +10,7 @@ export default async function Home() {
           cards: {
             where: { deletedAt: null },
             orderBy: { position: "asc" },
+            include: { tags: { include: { tag: true } } },
           },
         },
       },

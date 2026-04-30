@@ -3,12 +3,13 @@
 import type { CardData } from "@/lib/types";
 import { Tile } from "./Surface";
 import { PriorityBadge, PriorityBar } from "./PriorityBadge";
+import { TagChip } from "./TagChip";
 
 interface CardProps extends CardData {
   index: number;
 }
 
-export function Card({ title, description, priority, index }: CardProps) {
+export function Card({ title, description, priority, tags, index }: CardProps) {
   return (
     <Tile
       className="px-4 py-3 cursor-default animate-tile-in"
@@ -27,6 +28,14 @@ export function Card({ title, description, priority, index }: CardProps) {
         <p className="mt-1.5 text-xs text-parchment-500 leading-relaxed line-clamp-2">
           {description}
         </p>
+      )}
+
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {tags.map(({ tag }) => (
+            <TagChip key={tag.id} name={tag.name} color={tag.color} />
+          ))}
+        </div>
       )}
     </Tile>
   );
