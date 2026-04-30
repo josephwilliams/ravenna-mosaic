@@ -37,7 +37,7 @@ export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardM
         body: JSON.stringify({ title: title.trim(), description: description.trim() || undefined, priority }),
       });
       if (res.ok) {
-        const card = await res.json();
+        const { data: card } = await res.json();
         if (tagIds.length > 0) {
           await fetch(`/api/cards/${card.id}/tags`, {
             method: "PUT",

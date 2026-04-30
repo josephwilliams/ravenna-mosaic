@@ -1,33 +1,40 @@
 import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ boardId: string }> }
 ) {
-  const { boardId } = await params;
-  const { columnId, position } = await req.json();
+  try {
+    const { boardId } = await params;
+    const body = await req.json();
+    const invalid = validate(body, { columnId: "string", position: "number" });
+    if (invalid) return error(ErrorCode.VALIDATION, invalid);
 
-  await prisma.$transaction(async (tx) => {
-    const column = await tx.column.findUniqueOrThrow({ where: { id: columnId } });
+    await prisma.$transaction(async (tx) => {
+      const column = await tx.column.findUniqueOrThrow({ where: { id: body.columnId } });
 
-    if (position > column.position) {
-      await tx.column.updateMany({
-        where: { boardId, position: { gt: column.position, lte: position } },
-        data: { position: { decrement: 1 } },
+      if (body.position > column.position) {
+        await tx.column.updateMany({
+          where: { boardId, position: { gt: column.position, lte: body.position } },
+          data: { position: { decrement: 1 } },
+        });
+      } else if (body.position < column.position) {
+        await tx.column.updateMany({
+          where: { boardId, position: { gte: body.position, lt: column.position } },
+          data: { position: { increment: 1 } },
+        });
+      }
+
+      await tx.column.update({
+        where: { id: body.columnId },
+        data: { position: body.position },
       });
-    } else if (position < column.position) {
-      await tx.column.updateMany({
-        where: { boardId, position: { gte: position, lt: column.position } },
-        data: { position: { increment: 1 } },
-      });
-    }
-
-    await tx.column.update({
-      where: { id: columnId },
-      data: { position },
     });
-  });
 
-  return NextResponse.json({ moved: true });
+    return success({ reordered: true });
+  } catch (err) {
+    return handleError(err);
+  }
 }

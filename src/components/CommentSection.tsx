@@ -26,7 +26,7 @@ export function CommentSection({ cardId, initialComments }: CommentSectionProps)
         body: JSON.stringify({ content: content.trim() }),
       });
       if (res.ok) {
-        const comment = await res.json();
+        const { data: comment } = await res.json();
         setComments((prev) => [...prev, comment]);
         setContent("");
       }

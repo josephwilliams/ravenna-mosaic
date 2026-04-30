@@ -1,38 +1,53 @@
 import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { success, created, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
 
 export async function GET(
   _req: NextRequest,
   ctx: RouteContext<"/api/boards/[boardId]/columns/[columnId]/cards">
 ) {
-  const { columnId } = await ctx.params;
-  const cards = await prisma.card.findMany({
-    where: { columnId, deletedAt: null },
-    orderBy: { position: "asc" },
-  });
-  return NextResponse.json(cards);
+  try {
+    const { columnId } = await ctx.params;
+    const cards = await prisma.card.findMany({
+      where: { columnId, deletedAt: null },
+      orderBy: { position: "asc" },
+    });
+    return success(cards);
+  } catch (err) {
+    return handleError(err);
+  }
 }
 
 export async function POST(
   req: NextRequest,
   ctx: RouteContext<"/api/boards/[boardId]/columns/[columnId]/cards">
 ) {
-  const { columnId } = await ctx.params;
-  const { title, description, priority } = await req.json();
+  try {
+    const { columnId } = await ctx.params;
+    const body = await req.json();
 
-  const maxPos = await prisma.card.aggregate({
-    where: { columnId },
-    _max: { position: true },
-  });
+    const invalid = validate(body, { title: "string" });
+    if (invalid) return error(ErrorCode.VALIDATION, invalid);
 
-  const card = await prisma.card.create({
-    data: {
-      columnId,
-      title,
-      description,
-      priority,
-      position: (maxPos._max.position ?? -1) + 1,
-    },
-  });
-  return NextResponse.json(card, { status: 201 });
+    const priorityErr = validatePriority(body.priority);
+    if (priorityErr) return error(ErrorCode.VALIDATION, priorityErr);
+
+    const maxPos = await prisma.card.aggregate({
+      where: { columnId },
+      _max: { position: true },
+    });
+
+    const card = await prisma.card.create({
+      data: {
+        columnId,
+        title: body.title.trim(),
+        description: body.description?.trim() || null,
+        priority: body.priority ?? "MEDIUM",
+        position: (maxPos._max.position ?? -1) + 1,
+      },
+    });
+    return created(card);
+  } catch (err) {
+    return handleError(err);
+  }
 }

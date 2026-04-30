@@ -14,7 +14,7 @@ export function TagPicker({ selected, onChange }: TagPickerProps) {
   useEffect(() => {
     fetch("/api/tags")
       .then((r) => r.json())
-      .then((data) => setTags(data.map((t: TagData & { _count?: unknown }) => ({ id: t.id, name: t.name, color: t.color }))));
+      .then((res) => setTags(res.data.map((t: TagData & { _count?: unknown }) => ({ id: t.id, name: t.name, color: t.color }))));
   }, []);
 
   function toggle(tagId: string) {

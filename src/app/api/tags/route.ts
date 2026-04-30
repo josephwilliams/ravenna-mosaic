@@ -1,18 +1,29 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { success, created, error, validate, handleError, ErrorCode } from "@/lib/api";
 
 export async function GET() {
-  const tags = await prisma.tag.findMany({
-    include: { _count: { select: { cards: true } } },
-    orderBy: { name: "asc" },
-  });
-  return NextResponse.json(tags);
+  try {
+    const tags = await prisma.tag.findMany({
+      include: { _count: { select: { cards: true } } },
+      orderBy: { name: "asc" },
+    });
+    return success(tags);
+  } catch (err) {
+    return handleError(err);
+  }
 }
 
 export async function POST(req: Request) {
-  const { name, color } = await req.json();
-  const tag = await prisma.tag.create({
-    data: { name, color },
-  });
-  return NextResponse.json(tag, { status: 201 });
+  try {
+    const body = await req.json();
+    const invalid = validate(body, { name: "string", color: "string" });
+    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+
+    const tag = await prisma.tag.create({
+      data: { name: body.name.trim(), color: body.color.trim() },
+    });
+    return created(tag);
+  } catch (err) {
+    return handleError(err);
+  }
 }

@@ -1,17 +1,24 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { success, created, error, validate, handleError, ErrorCode } from "@/lib/api";
 
 export async function GET() {
-  const boards = await prisma.board.findMany({
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(boards);
+  try {
+    const boards = await prisma.board.findMany({ orderBy: { createdAt: "desc" } });
+    return success(boards);
+  } catch (err) {
+    return handleError(err);
+  }
 }
 
 export async function POST(req: Request) {
-  const { title } = await req.json();
-  const board = await prisma.board.create({
-    data: { title },
-  });
-  return NextResponse.json(board, { status: 201 });
+  try {
+    const body = await req.json();
+    const invalid = validate(body, { title: "string" });
+    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+
+    const board = await prisma.board.create({ data: { title: body.title.trim() } });
+    return created(board);
+  } catch (err) {
+    return handleError(err);
+  }
 }

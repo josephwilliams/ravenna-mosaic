@@ -1,19 +1,26 @@
 import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
 
 export async function PUT(
   req: NextRequest,
   ctx: RouteContext<"/api/cards/[cardId]/tags">
 ) {
-  const { cardId } = await ctx.params;
-  const { tagIds } = await req.json();
+  try {
+    const { cardId } = await ctx.params;
+    const body = await req.json();
+    const invalid = validate(body, { tagIds: "string[]" });
+    if (invalid) return error(ErrorCode.VALIDATION, invalid);
 
-  await prisma.$transaction([
-    prisma.cardTag.deleteMany({ where: { cardId } }),
-    prisma.cardTag.createMany({
-      data: tagIds.map((tagId: string) => ({ cardId, tagId })),
-    }),
-  ]);
+    await prisma.$transaction([
+      prisma.cardTag.deleteMany({ where: { cardId } }),
+      prisma.cardTag.createMany({
+        data: body.tagIds.map((tagId: string) => ({ cardId, tagId })),
+      }),
+    ]);
 
-  return NextResponse.json({ updated: true });
+    return success({ updated: true });
+  } catch (err) {
+    return handleError(err);
+  }
 }

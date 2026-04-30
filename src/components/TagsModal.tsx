@@ -32,7 +32,7 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
     if (open) {
       fetch("/api/tags")
         .then((r) => r.json())
-        .then(setTags);
+        .then((res) => setTags(res.data));
     }
   }, [open]);
 
@@ -48,7 +48,7 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
         body: JSON.stringify({ name: name.trim(), color }),
       });
       if (res.ok) {
-        const tag = await res.json();
+        const { data: tag } = await res.json();
         setTags((prev) => [...prev, { ...tag, _count: { cards: 0 } }].sort((a, b) => a.name.localeCompare(b.name)));
         setName("");
       }
@@ -63,8 +63,8 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
     if (res.ok) {
       setTags((prev) => prev.filter((t) => t.id !== tag.id));
     } else {
-      const data = await res.json();
-      setError(data.error);
+      const { error: err } = await res.json();
+      setError(err.message);
     }
   }
 

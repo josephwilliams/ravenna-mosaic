@@ -1,49 +1,52 @@
 import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
 
 export async function PATCH(
   req: NextRequest,
   ctx: RouteContext<"/api/cards/[cardId]/move">
 ) {
-  const { cardId } = await ctx.params;
-  const { columnId, position } = await req.json();
+  try {
+    const { cardId } = await ctx.params;
+    const body = await req.json();
+    const invalid = validate(body, { columnId: "string", position: "number" });
+    if (invalid) return error(ErrorCode.VALIDATION, invalid);
 
-  await prisma.$transaction(async (tx) => {
-    const card = await tx.card.findUniqueOrThrow({ where: { id: cardId } });
-    const movingBetweenColumns = card.columnId !== columnId;
+    await prisma.$transaction(async (tx) => {
+      const card = await tx.card.findUniqueOrThrow({ where: { id: cardId } });
+      const movingBetweenColumns = card.columnId !== body.columnId;
 
-    if (movingBetweenColumns) {
-      // Close the gap in the source column
-      await tx.card.updateMany({
-        where: { columnId: card.columnId, position: { gt: card.position }, deletedAt: null },
-        data: { position: { decrement: 1 } },
-      });
-
-      // Make room in the destination column
-      await tx.card.updateMany({
-        where: { columnId, position: { gte: position }, deletedAt: null },
-        data: { position: { increment: 1 } },
-      });
-    } else {
-      // Reorder within the same column
-      if (position > card.position) {
+      if (movingBetweenColumns) {
         await tx.card.updateMany({
-          where: { columnId, position: { gt: card.position, lte: position }, deletedAt: null },
+          where: { columnId: card.columnId, position: { gt: card.position }, deletedAt: null },
           data: { position: { decrement: 1 } },
         });
-      } else if (position < card.position) {
         await tx.card.updateMany({
-          where: { columnId, position: { gte: position, lt: card.position }, deletedAt: null },
+          where: { columnId: body.columnId, position: { gte: body.position }, deletedAt: null },
           data: { position: { increment: 1 } },
         });
+      } else {
+        if (body.position > card.position) {
+          await tx.card.updateMany({
+            where: { columnId: body.columnId, position: { gt: card.position, lte: body.position }, deletedAt: null },
+            data: { position: { decrement: 1 } },
+          });
+        } else if (body.position < card.position) {
+          await tx.card.updateMany({
+            where: { columnId: body.columnId, position: { gte: body.position, lt: card.position }, deletedAt: null },
+            data: { position: { increment: 1 } },
+          });
+        }
       }
-    }
 
-    await tx.card.update({
-      where: { id: cardId },
-      data: { columnId, position },
+      await tx.card.update({
+        where: { id: cardId },
+        data: { columnId: body.columnId, position: body.position },
+      });
     });
-  });
 
-  return NextResponse.json({ moved: true });
+    return success({ moved: true });
+  } catch (err) {
+    return handleError(err);
+  }
 }
