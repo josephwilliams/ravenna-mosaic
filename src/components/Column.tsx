@@ -6,9 +6,10 @@ import { Card } from "./Card";
 
 interface ColumnProps extends ColumnData {
   index: number;
+  boardId: string;
 }
 
-export function Column({ title, cards, index }: ColumnProps) {
+export function Column({ id, title, cards, index, boardId }: ColumnProps) {
   return (
     <Surface
       className="flex flex-col min-w-[300px] max-w-[340px] w-[340px] animate-slide-up"
@@ -28,7 +29,7 @@ export function Column({ title, cards, index }: ColumnProps) {
 
       <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2">
         {cards.map((card, i) => (
-          <Card key={card.id} {...card} index={i} />
+          <Card key={card.id} {...card} index={i} boardId={boardId} columnId={id} />
         ))}
 
         {cards.length === 0 && (

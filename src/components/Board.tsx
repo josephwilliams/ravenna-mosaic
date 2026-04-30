@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Flame, Plus, BookOpen } from "lucide-react";
+import { Flame, Plus, BookOpen, Archive } from "lucide-react";
 import type { BoardData } from "@/lib/types";
 import { Column } from "./Column";
 import { CreateCardModal } from "./CreateCardModal";
@@ -30,6 +30,14 @@ export function Board({ id, title, columns }: BoardData) {
           </button>
 
           <Link
+            href="/archive"
+            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+          >
+            <Archive size={13} strokeWidth={1.5} />
+            Archive
+          </Link>
+
+          <Link
             href="/ponderings"
             className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
           >
@@ -48,7 +56,7 @@ export function Board({ id, title, columns }: BoardData) {
       <main className="flex-1 overflow-x-auto px-8 pb-8">
         <div className="flex gap-5 h-full">
           {columns.map((col, i) => (
-            <Column key={col.id} {...col} index={i} />
+            <Column key={col.id} {...col} index={i} boardId={id} />
           ))}
         </div>
       </main>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Priority, ColumnData } from "@/lib/types";
+import { Modal } from "./Modal";
 
 interface CreateCardModalProps {
   open: boolean;
@@ -22,8 +23,6 @@ export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardM
   const [columnId, setColumnId] = useState(columns[0]?.id ?? "");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [loading, setLoading] = useState(false);
-
-  if (!open) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,79 +53,75 @@ export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardM
     "bg-white border border-parchment-200 rounded-tile px-3 py-2 text-sm font-body text-parchment-700 focus:outline-none focus:border-parchment-400 focus:ring-1 focus:ring-parchment-300 transition-colors";
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center">
-      <div className="absolute inset-0 bg-parchment-900/30 backdrop-blur-sm" onClick={onClose} />
+    <Modal open={open} onClose={onClose}>
+      <h2 className="font-display text-xl font-semibold text-parchment-800 mb-1">
+        New Card
+      </h2>
+      <p className="text-xs text-parchment-500 font-body mb-6">
+        Submit a petition to the council.
+      </p>
 
-      <div className="relative bg-parchment-50 border border-parchment-200 rounded-surface shadow-tile-hover p-8 w-full max-w-md animate-slide-up">
-        <h2 className="font-display text-xl font-semibold text-parchment-800 mb-1">
-          New Card
-        </h2>
-        <p className="text-xs text-parchment-500 font-body mb-6">
-          Submit a petition to the council.
-        </p>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. Investigate the rumors from Harrenhal"
+          autoFocus
+          className={inputClass}
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Investigate the rumors from Harrenhal"
-            autoFocus
-            className={inputClass}
-          />
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Further details for the council (optional)"
+          rows={3}
+          className={`${inputClass} resize-none`}
+        />
 
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Further details for the council (optional)"
-            rows={3}
-            className={`${inputClass} resize-none`}
-          />
+        <div className="flex gap-3">
+          <select
+            value={columnId}
+            onChange={(e) => setColumnId(e.target.value)}
+            className={`flex-1 ${selectClass}`}
+          >
+            {columns.map((col) => (
+              <option key={col.id} value={col.id}>
+                {col.title}
+              </option>
+            ))}
+          </select>
 
-          <div className="flex gap-3">
-            <select
-              value={columnId}
-              onChange={(e) => setColumnId(e.target.value)}
-              className={`flex-1 ${selectClass}`}
-            >
-              {columns.map((col) => (
-                <option key={col.id} value={col.id}>
-                  {col.title}
-                </option>
-              ))}
-            </select>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as Priority)}
+            className={selectClass}
+          >
+            {priorities.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as Priority)}
-              className={selectClass}
-            >
-              {priorities.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-body font-medium text-parchment-500 hover:text-parchment-700 transition-colors"
-            >
-              Dismiss
-            </button>
-            <button
-              type="submit"
-              disabled={!title.trim() || loading}
-              className="px-5 py-2 text-xs font-body font-semibold text-parchment-50 bg-parchment-800 rounded-tile hover:bg-parchment-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Submitting..." : "Submit Petition"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-body font-medium text-parchment-500 hover:text-parchment-700 transition-colors"
+          >
+            Dismiss
+          </button>
+          <button
+            type="submit"
+            disabled={!title.trim() || loading}
+            className="px-5 py-2 text-xs font-body font-semibold text-parchment-50 bg-parchment-800 rounded-tile hover:bg-parchment-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? "Submitting..." : "Submit Petition"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
