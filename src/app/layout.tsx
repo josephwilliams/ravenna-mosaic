@@ -15,7 +15,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Mosaic",
+  title: "The Small Council",
   description: "A kanban board carved in stone",
 };
 

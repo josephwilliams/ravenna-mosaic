@@ -68,7 +68,7 @@ export function MobileNav({ onNewCard, onNewColumn, onTags }: MobileNavProps) {
                 <div className="flex items-center gap-2">
                   <Flame size={16} className="text-parchment-700" strokeWidth={1.5} />
                   <span className="font-display text-xl font-semibold text-parchment-800">
-                    Mosaic
+                    The Small Council
                   </span>
                 </div>
                 <button
