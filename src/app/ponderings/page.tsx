@@ -43,6 +43,11 @@ const entries: Entry[] = [
     title: "Grouping",
     body: "Went with 'group by urgency' — sorts cards within each column by priority. Most obvious grouping mechanic. Grouping by tag could also work, or chronological sort by creation date. Another optimistic state change: UI reorders instantly, batch PATCH persists per column in the background.",
   },
+  {
+    commit: "Commit 13",
+    title: "Logging",
+    body: "Wanted a decorator pattern — withLogging wrapping each route handler, reusable for Sentry, PostHog, whatever analytics. Ended up using Next.js middleware instead since it's one file for all routes. The decorator idea still holds for per-handler concerns. Worth noting: Vercel swallows console.log in prod, so this would need a real transport (PostHog, Sentry, Axiom) to be useful beyond local dev.",
+  },
 ];
 
 export default function PonderingsPage() {

@@ -14,13 +14,12 @@ export function buildRequest(path: string, options?: { method?: string; body?: u
     }
   }
 
-  return new NextRequest(url, {
-    method: options?.method ?? "GET",
-    ...(options?.body && {
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(options.body),
-    }),
-  });
+  const init: Record<string, unknown> = { method: options?.method ?? "GET" };
+  if (options?.body) {
+    init.headers = { "Content-Type": "application/json" };
+    init.body = JSON.stringify(options.body);
+  }
+  return new NextRequest(url, init);
 }
 
 export async function apiCall(handler: Function, req: NextRequest, params: Record<string, string> = {}) {
