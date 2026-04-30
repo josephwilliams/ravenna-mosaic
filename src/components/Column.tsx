@@ -1,7 +1,7 @@
 "use client";
 
 import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { Settings, ChevronDown } from "lucide-react";
+import { Settings, ChevronDown, Plus } from "lucide-react";
 import type { ColumnData } from "@/lib/types";
 import { Surface } from "./Surface";
 import { Card } from "./Card";
@@ -11,9 +11,10 @@ interface ColumnProps extends ColumnData {
   boardId: string;
   onEdit: (col: { id: string; title: string; cardCount: number }) => void;
   onLoadMore: (columnId: string, skip: number) => void;
+  onAddCard: (columnId: string) => void;
 }
 
-export function Column({ id, title, cards, totalCards, index, boardId, onEdit, onLoadMore }: ColumnProps) {
+export function Column({ id, title, cards, totalCards, index, boardId, onEdit, onLoadMore, onAddCard }: ColumnProps) {
   const hasMore = cards.length < totalCards;
 
   return (
@@ -22,10 +23,10 @@ export function Column({ id, title, cards, totalCards, index, boardId, onEdit, o
         <div
           ref={colProvided.innerRef}
           {...colProvided.draggableProps}
-          className="shrink-0"
+          className="shrink-0 h-full"
         >
           <Surface
-            className="flex flex-col min-w-[300px] max-w-[340px] w-[340px] animate-slide-up"
+            className="flex flex-col min-w-[300px] max-w-[340px] w-[340px] h-full animate-slide-up"
             style={{ animationDelay: `${index * 80}ms` }}
             data-column-index={index}
           >
@@ -41,6 +42,12 @@ export function Column({ id, title, cards, totalCards, index, boardId, onEdit, o
                   <span className="text-[11px] font-body font-medium text-parchment-400 tabular-nums">
                     {totalCards}
                   </span>
+                  <button
+                    onClick={() => onAddCard(id)}
+                    className="text-parchment-400 hover:text-parchment-700 transition-colors"
+                  >
+                    <Plus size={12} strokeWidth={2} />
+                  </button>
                   <button
                     onClick={() => onEdit({ id, title, cardCount: totalCards })}
                     className="text-parchment-400 hover:text-parchment-700 transition-colors"

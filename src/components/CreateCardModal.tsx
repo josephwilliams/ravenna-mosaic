@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Priority, ColumnData } from "@/lib/types";
 import { Modal } from "./Modal";
 import { TagPicker } from "./TagPicker";
@@ -10,6 +10,7 @@ interface CreateCardModalProps {
   onClose: () => void;
   boardId: string;
   columns: ColumnData[];
+  defaultColumnId?: string;
 }
 
 const priorities: { value: Priority; label: string }[] = [
@@ -18,11 +19,15 @@ const priorities: { value: Priority; label: string }[] = [
   { value: "LOW", label: "Low" },
 ];
 
-export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardModalProps) {
+export function CreateCardModal({ open, onClose, boardId, columns, defaultColumnId }: CreateCardModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [columnId, setColumnId] = useState(columns[0]?.id ?? "");
+  const [columnId, setColumnId] = useState(defaultColumnId ?? columns[0]?.id ?? "");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
+
+  useEffect(() => {
+    if (open && defaultColumnId) setColumnId(defaultColumnId);
+  }, [open, defaultColumnId]);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 

@@ -17,6 +17,7 @@ import { useBoardKeyboard } from "@/hooks/useBoardKeyboard";
 export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalColumnId, setModalColumnId] = useState<string | undefined>();
   const [colModalOpen, setColModalOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<{ id: string; title: string; cardCount: number } | null>(null);
   const [tagsOpen, setTagsOpen] = useState(false);
@@ -185,7 +186,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
           </div>
 
           <button
-            onClick={() => setModalOpen(true)}
+            onClick={() => { setModalColumnId(undefined); setModalOpen(true); }}
             className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
           >
             <Plus size={13} strokeWidth={2} />
@@ -227,7 +228,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
           <div className="h-px flex-1 bg-gradient-to-r from-parchment-300 to-transparent" />
 
           <MobileNav
-            onNewCard={() => setModalOpen(true)}
+            onNewCard={() => { setModalColumnId(undefined); setModalOpen(true); }}
             onNewColumn={() => setColModalOpen(true)}
             onTags={() => setTagsOpen(true)}
           />
@@ -259,7 +260,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
                 className="flex gap-5 h-full after:shrink-0 after:w-px after:content-['']"
               >
                 {filteredColumns.map((col, i) => (
-                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} onLoadMore={loadMore} />
+                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} onLoadMore={loadMore} onAddCard={(colId) => { setModalColumnId(colId); setModalOpen(true); }} />
                 ))}
                 {provided.placeholder}
               </div>
@@ -270,9 +271,10 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
       <CreateCardModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setModalColumnId(undefined); }}
         boardId={id}
         columns={columns}
+        defaultColumnId={modalColumnId}
       />
 
       <TagsModal
