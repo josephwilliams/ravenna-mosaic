@@ -25,7 +25,7 @@ export default async function CardDetailPage({
   if (!card || card.deletedAt) return notFound();
 
   return (
-    <div className="min-h-full">
+    <div className="h-full overflow-y-auto">
       <div className="max-w-2xl mx-auto px-8 py-16">
         <header className="mb-10 animate-fade-in">
           <Link

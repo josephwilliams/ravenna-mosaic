@@ -32,7 +32,7 @@ const entries: Entry[] = [
 
 export default function PonderingsPage() {
   return (
-    <div className="min-h-full bg-parchment-50">
+    <div className="h-full overflow-y-auto bg-parchment-50">
       <div className="max-w-2xl mx-auto px-8 py-16">
         <header className="mb-12 animate-fade-in">
           <Link

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Priority, ColumnData } from "@/lib/types";
 import { Modal } from "./Modal";
+import { TagPicker } from "./TagPicker";
 
 interface CreateCardModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardM
   const [description, setDescription] = useState("");
   const [columnId, setColumnId] = useState(columns[0]?.id ?? "");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -35,9 +37,18 @@ export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardM
         body: JSON.stringify({ title: title.trim(), description: description.trim() || undefined, priority }),
       });
       if (res.ok) {
+        const card = await res.json();
+        if (tagIds.length > 0) {
+          await fetch(`/api/cards/${card.id}/tags`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tagIds }),
+          });
+        }
         setTitle("");
         setDescription("");
         setPriority("MEDIUM");
+        setTagIds([]);
         onClose();
         window.location.reload();
       }
@@ -104,6 +115,8 @@ export function CreateCardModal({ open, onClose, boardId, columns }: CreateCardM
             ))}
           </select>
         </div>
+
+        <TagPicker selected={tagIds} onChange={setTagIds} />
 
         <div className="flex justify-end gap-3 pt-2">
           <button

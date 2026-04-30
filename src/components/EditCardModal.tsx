@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { Priority, CardData } from "@/lib/types";
 import { Modal } from "./Modal";
+import { TagPicker } from "./TagPicker";
 
 interface EditCardModalProps {
   open: boolean;
@@ -23,6 +24,7 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
   const [title, setTitle] = useState(card.title);
   const [description, setDescription] = useState(card.description ?? "");
   const [priority, setPriority] = useState<Priority>(card.priority);
+  const [tagIds, setTagIds] = useState<string[]>(card.tags.map((t) => t.tag.id));
   const [loading, setLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -33,16 +35,23 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
     if (!title.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(endpoint, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim() || null,
-          priority,
+      const [cardRes, tagsRes] = await Promise.all([
+        fetch(endpoint, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: title.trim(),
+            description: description.trim() || null,
+            priority,
+          }),
         }),
-      });
-      if (res.ok) {
+        fetch(`/api/cards/${card.id}/tags`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tagIds }),
+        }),
+      ]);
+      if (cardRes.ok && tagsRes.ok) {
         onClose();
         window.location.reload();
       }
@@ -99,6 +108,8 @@ export function EditCardModal({ open, onClose, card, boardId, columnId }: EditCa
             <option key={p.value} value={p.value}>{p.label}</option>
           ))}
         </select>
+
+        <TagPicker selected={tagIds} onChange={setTagIds} />
 
         <div className="flex items-center justify-between pt-2">
           {!confirmDelete ? (
