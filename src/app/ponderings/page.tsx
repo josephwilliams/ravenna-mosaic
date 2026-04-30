@@ -28,6 +28,36 @@ const entries: Entry[] = [
     title: "The Parchment",
     body: "First pass at the UI was dark gunmetal — looked like every generic dashboard ever made. Scrapped it. The project is called Mosaic, named after Ravenna's Byzantine mosaics. Leaned into that: warm parchment palette, Cormorant Garamond for display type, soft warm shadows. Built a proper design system with reusable Surface and Tile primitives so the aesthetic stays consistent as we grow. Currently watching Knight of the Seven Kingdoms, so the seed data became a Small Council kanban board. Sometimes the vibe finds you.",
   },
+  {
+    commit: "Commit 5",
+    title: "The Small Council",
+    body: "Themed the seed data — Petitions, In Council, Awaiting the Crown, Decreed. Cards about dragon sightings, missing Masters of Coin, and the eternal Bracken-Blackwood dispute. Tags for Defense, Diplomacy, Coin, Smallfolk, Infrastructure. Comments from Grand Maester Orwyle and Lord Larys Strong. The demo has personality now.",
+  },
+  {
+    commit: "Commit 6",
+    title: "Card Editing & Archive",
+    body: "Cards needed a way to be edited and soft-deleted. Gear icon on each card opens an edit modal — title, description, priority, archive. Two-step confirm on archive so you don't lose things by accident. Archive page at /archive lists everything that's been shelved, with a restore button. Modals use a portal to escape column stacking contexts.",
+  },
+  {
+    commit: "Commit 7",
+    title: "Comments",
+    body: "Full comments vertical — card detail page at /cards/[id], comment list, post form, hard delete. Considered adding mock authors (Rhaenyra, Otto Hightower) but no auth = no author. Less friction. Cmd+Enter submits. Hard delete on comments — normally I'd soft delete since comments might have likes or replies, but simplicity wins for a demo.",
+  },
+  {
+    commit: "Commit 8",
+    title: "Drag & Drop",
+    body: "Cards move between columns now. Used @hello-pangea/dnd with optimistic state updates — card snaps instantly, API persists in the background. Pondered whether optimistic is right here. For likes, sure. For reordering? If the API fails, the board is silently out of sync. The right answer is probably optimistic + rollback on error, not pessimistic. Portaled the dragged card to document.body so it floats above column stacking contexts.",
+  },
+  {
+    commit: "Commit 9",
+    title: "Tags",
+    body: "Tag management modal — create with color picker, delete with a guard. API returns 409 if you try to delete a tag that's in use. Disabled trash icon + tooltip on the frontend too. Both create and edit card modals now have a tag picker — toggle pills on and off. Tags sync via a PUT that replaces all assignments in a transaction.",
+  },
+  {
+    commit: "Commit 10",
+    title: "Filters",
+    body: "Filter by priority and tag — toggle pills in a bar below the nav. Debated whether to build a separate /api/cards endpoint with filters or just add query params to the existing board-by-id GET that already includes cards. Went with the latter — the board endpoint already returns nested columns and cards, so adding ?priority=HIGH&tagId=abc filters at the Prisma level was natural. No new endpoint, no new data shape. Client-side filtering stays for instant toggling; the API filters exist for external consumers and to satisfy the 'listing with filters' requirement.",
+  },
 ];
 
 export default function PonderingsPage() {

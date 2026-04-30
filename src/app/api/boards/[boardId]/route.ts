@@ -2,10 +2,19 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: RouteContext<"/api/boards/[boardId]">
 ) {
   const { boardId } = await ctx.params;
+  const { searchParams } = req.nextUrl;
+
+  const priority = searchParams.getAll("priority");
+  const tagIds = searchParams.getAll("tagId");
+
+  const cardWhere: Record<string, unknown> = { deletedAt: null };
+  if (priority.length > 0) cardWhere.priority = { in: priority };
+  if (tagIds.length > 0) cardWhere.tags = { some: { tagId: { in: tagIds } } };
+
   const board = await prisma.board.findUnique({
     where: { id: boardId },
     include: {
@@ -13,8 +22,9 @@ export async function GET(
         orderBy: { position: "asc" },
         include: {
           cards: {
-            where: { deletedAt: null },
+            where: cardWhere,
             orderBy: { position: "asc" },
+            include: { tags: { include: { tag: true } }, _count: { select: { comments: true } } },
           },
         },
       },
