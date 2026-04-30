@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Small Council
 
-## Getting Started
+Kanban board built for the Ravenna Coding Challenge.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + TypeScript
+- Tailwind CSS v4
+- PostgreSQL via Neon (serverless)
+- Prisma v6 ORM
+- @hello-pangea/dnd for drag and drop
+- Vitest for API tests
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local` with your Neon (or any Postgres) connection strings:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+DATABASE_URL=postgresql://...
+DIRECT_URL=postgresql://...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+If you're using Neon, `DATABASE_URL` should be the pooled connection string and `DIRECT_URL` the direct (non-pooled) one. Prisma uses `DIRECT_URL` for migrations.
 
-## Learn More
+## Database
 
-To learn more about Next.js, take a look at the following resources:
+Run migrations to create tables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm db:migrate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Optionally seed the database with sample data (a board with columns, cards, tags, and comments):
 
-## Deploy on Vercel
+```bash
+pnpm db:seed
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Browse the database directly:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm db:studio
+```
+
+## Dev
+
+```bash
+pnpm dev
+```
+
+## Tests
+
+47 API tests covering boards, columns, cards, tags, and comments.
+
+```bash
+pnpm test
+```
+
+Tests hit a real database (no mocks). Make sure `.env.local` is configured.
+
+## Key decisions
+
+- **Neon Postgres** - needed connection pooling for serverless deploy on Vercel. Prisma CLI doesn't read `.env.local`, so `dotenv-cli` bridges that gap.
+- **Optimistic UI** - drag/drop and reordering update state instantly, persist to the API in the background.
+- **Uniform API responses** - every endpoint returns `{ data }` on success and `{ error: { code, message } }` on failure. Error codes are an enum (NOT_FOUND, VALIDATION, CONFLICT, INTERNAL).
+- **Soft delete** - cards are archived, not destroyed. Hard delete on comments.
+- **Next.js middleware for logging** - structured JSON logs on all `/api/*` routes.
+- **Direct route handler tests** - tests call Next.js route handlers directly (no HTTP server). Faster, same code path as production.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm test` | Run API tests |
+| `pnpm db:migrate` | Run Prisma migrations |
+| `pnpm db:seed` | Seed with sample data |
+| `pnpm db:studio` | Open Prisma Studio |

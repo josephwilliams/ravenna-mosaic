@@ -11,27 +11,27 @@ const entries: Entry[] = [
   {
     commit: "Commit 2",
     title: "The Database",
-    body: "Originally planned SQLite for simplicity, but switched to Neon Postgres midway — better story for Vercel deploy and the demo. Hit an ESM bug with Prisma 7 on Node 22, so pinned to v6. Also discovered Prisma CLI ignores .env.local, so added dotenv-cli to bridge the gap. Small tax for a cleaner setup.",
+    body: "Went with Neon Postgres for the database. Good fit for Vercel deploy and the demo. Hit an ESM bug with Prisma 7 on Node 22, so pinned to v6. Also discovered Prisma CLI ignores .env.local, so added dotenv-cli to bridge the gap. Small tax for a cleaner setup.",
   },
   {
     commit: "Commit 4",
     title: "The Parchment",
-    body: "First pass at the UI was dark gunmetal — looked like every generic dashboard ever made. Scrapped it. The project is called Mosaic, named after Ravenna's Byzantine mosaics. Leaned into that: warm parchment palette, Cormorant Garamond for display type, soft warm shadows. Built a proper design system with reusable Surface and Tile primitives so the aesthetic stays consistent as we grow. Currently watching Knight of the Seven Kingdoms, so the seed data became a Small Council kanban board. Sometimes the vibe finds you.",
+    body: "First pass at the UI was dark gunmetal. Looked like every generic dashboard ever made. Scrapped it. The project was originally called Mosaic, after Ravenna's Byzantine mosaics. Leaned into that: warm parchment palette, Cormorant Garamond for display type, soft warm shadows. Built a proper design system with reusable Surface and Tile primitives so the aesthetic stays consistent as we grow. Currently watching Knight of the Seven Kingdoms, so the seed data became a Small Council kanban board. Sometimes the vibe finds you.",
   },
   {
     commit: "Commit 7",
     title: "Comments",
-    body: "Was thinking about adding mock characters as comment authors (Rhaenyra, Otto Hightower) but no auth = no author. Less friction. Hard delete on comments — normally I'd soft delete since comments might have likes or replies, but simplicity wins for a demo.",
+    body: "Was thinking about adding mock characters as comment authors (Rhaenyra, Otto Hightower) but no auth means no author. Less friction. Hard delete on comments. Normally I'd soft delete since comments might have likes or replies, but simplicity wins for a demo.",
   },
   {
     commit: "Commit 8",
     title: "Drag & Drop",
-    body: "Optimistic state updates — card snaps instantly, API persists in the background. Pondered whether optimistic is right here. For likes, sure. For reordering? If the API fails, the board is silently out of sync. Probably optimistic + rollback on error, not pessimistic.",
+    body: "Optimistic state updates. Card snaps instantly, API persists in the background. Pondered whether optimistic is right here. For likes, sure. For reordering? If the API fails, the board is silently out of sync. Probably optimistic + rollback on error, not pessimistic.",
   },
   {
     commit: "Commit 10",
     title: "Filters",
-    body: "Debated whether to build a separate /api/cards endpoint with filters or just add query params to the existing board-by-id GET. Went with the latter — the board endpoint already returns nested columns and cards, so ?priority=HIGH&tagId=abc at the Prisma level was natural.",
+    body: "Debated whether to build a separate /api/cards endpoint with filters or just add query params to the existing board GET. Went with the latter. The board endpoint already returns nested columns and cards, so ?priority=HIGH&tagId=abc at the Prisma level was natural.",
   },
   {
     commit: "Commit 11",
@@ -41,12 +41,12 @@ const entries: Entry[] = [
   {
     commit: "Commit 12",
     title: "Grouping",
-    body: "Went with 'group by urgency' — sorts cards within each column by priority. Most obvious grouping mechanic. Grouping by tag could also work, or chronological sort by creation date. Another optimistic state change: UI reorders instantly, batch PATCH persists per column in the background.",
+    body: "Went with 'group by urgency'. Sorts cards within each column by priority. Most obvious grouping mechanic. Grouping by tag could also work, or chronological sort by creation date. Another optimistic state change: UI reorders instantly, batch PATCH persists per column in the background.",
   },
   {
     commit: "Commit 13",
     title: "Logging",
-    body: "Wanted a decorator pattern — withLogging wrapping each route handler, reusable for Sentry, PostHog, whatever analytics. Ended up using Next.js middleware instead since it's one file for all routes. The decorator idea still holds for per-handler concerns. Worth noting: Vercel swallows console.log in prod, so this would need a real transport (PostHog, Sentry, Axiom) to be useful beyond local dev.",
+    body: "Wanted a decorator pattern. withLogging wrapping each route handler, reusable for Sentry, PostHog, whatever analytics. Ended up using Next.js middleware instead since it's one file for all routes. The decorator idea still holds for per-handler concerns. Worth noting: Vercel swallows console.log in prod, so this would need a real transport (PostHog, Sentry, Axiom) to be useful beyond local dev.",
   },
 ];
 
@@ -66,8 +66,7 @@ export default function PonderingsPage() {
             Ponderings
           </h1>
           <p className="font-body text-sm text-parchment-500 mt-2 leading-relaxed">
-            Notes on building Mosaic — the decisions, the dead ends, and the
-            small satisfactions of getting something right.
+            Notes on building The Small Council.
           </p>
           <div className="h-px mt-6 bg-gradient-to-r from-parchment-300 to-transparent" />
         </header>
