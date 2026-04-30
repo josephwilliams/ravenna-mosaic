@@ -1,26 +1,100 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Parchment palette */
+  --parchment-50: #faf7f2;
+  --parchment-100: #f5f0e8;
+  --parchment-200: #ebe3d6;
+  --parchment-300: #d9cebb;
+  --parchment-400: #c4b49c;
+  --parchment-500: #a8957a;
+  --parchment-600: #8a7560;
+  --parchment-700: #6b5a47;
+  --parchment-800: #4a3d30;
+  --parchment-900: #2d2520;
+
+  /* Accents */
+  --terracotta: #b85c38;
+  --terracotta-soft: #b85c3818;
+  --gold: #b8963e;
+  --gold-soft: #b8963e18;
+  --sage: #5e8a65;
+  --sage-soft: #5e8a6518;
+  --azure: #4a7c9b;
+  --azure-soft: #4a7c9b18;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-parchment-50: var(--parchment-50);
+  --color-parchment-100: var(--parchment-100);
+  --color-parchment-200: var(--parchment-200);
+  --color-parchment-300: var(--parchment-300);
+  --color-parchment-400: var(--parchment-400);
+  --color-parchment-500: var(--parchment-500);
+  --color-parchment-600: var(--parchment-600);
+  --color-parchment-700: var(--parchment-700);
+  --color-parchment-800: var(--parchment-800);
+  --color-parchment-900: var(--parchment-900);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-soft: var(--terracotta-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+  --color-azure: var(--azure);
+  --color-azure-soft: var(--azure-soft);
+
+  --font-display: var(--font-cormorant-garamond);
+  --font-body: var(--font-outfit);
+
+  --radius-tile: 8px;
+  --radius-surface: 12px;
+
+  --shadow-tile: 0 1px 3px rgba(45, 37, 32, 0.06), 0 1px 2px rgba(45, 37, 32, 0.04);
+  --shadow-tile-hover: 0 8px 20px rgba(45, 37, 32, 0.1), 0 2px 6px rgba(45, 37, 32, 0.06);
+  --shadow-surface: 0 1px 4px rgba(45, 37, 32, 0.05);
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-tile-in: tile-in 0.4s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 0.6s ease both;
+  --animate-slide-up: slide-up 0.5s var(--ease-out-expo) both;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes tile-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--parchment-300) transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--parchment-50);
+  color: var(--parchment-800);
+  font-family: var(--font-body), system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
 }
