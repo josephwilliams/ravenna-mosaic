@@ -3,14 +3,16 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
-import { Flame, Plus, BookOpen, Archive } from "lucide-react";
+import { Flame, Plus, BookOpen, Archive, Tag } from "lucide-react";
 import type { BoardData, ColumnData, CardData } from "@/lib/types";
 import { Column } from "./Column";
 import { CreateCardModal } from "./CreateCardModal";
+import { TagsModal } from "./TagsModal";
 
 export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
   const [modalOpen, setModalOpen] = useState(false);
+  const [tagsOpen, setTagsOpen] = useState(false);
 
   const onDragEnd = useCallback(
     async (result: DropResult) => {
@@ -64,6 +66,14 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
             New Card
           </button>
 
+          <button
+            onClick={() => setTagsOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+          >
+            <Tag size={13} strokeWidth={1.5} />
+            Tags
+          </button>
+
           <Link
             href="/archive"
             className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
@@ -81,10 +91,6 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
           </Link>
 
           <div className="h-px flex-1 bg-gradient-to-r from-parchment-300 to-transparent" />
-
-          <span className="font-display text-sm font-normal text-parchment-400">
-            Mosaic
-          </span>
         </div>
       </header>
 
@@ -103,6 +109,11 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         onClose={() => setModalOpen(false)}
         boardId={id}
         columns={columns}
+      />
+
+      <TagsModal
+        open={tagsOpen}
+        onClose={() => setTagsOpen(false)}
       />
     </div>
   );
