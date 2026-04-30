@@ -173,7 +173,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
       <main className="flex-1 overflow-x-auto px-6 md:px-8 pb-6 md:pb-8">
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-5 h-full">
+          <div className="flex gap-5 h-full after:shrink-0 after:w-px after:content-['']">
             {filteredColumns.map((col, i) => (
               <Column key={col.id} {...col} index={i} boardId={id} />
             ))}
