@@ -2,11 +2,13 @@
 
 import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
-import { Flame, Plus, BookOpen, Archive, Tag } from "lucide-react";
+import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
+import { Flame, Plus, Columns3, BookOpen, Archive, Tag } from "lucide-react";
 import type { BoardData, ColumnData, CardData, Priority, TagData } from "@/lib/types";
 import { Column } from "./Column";
 import { CreateCardModal } from "./CreateCardModal";
+import { CreateColumnModal } from "./CreateColumnModal";
+import { EditColumnModal } from "./EditColumnModal";
 import { TagsModal } from "./TagsModal";
 import { FilterBar } from "./FilterBar";
 import { MobileNav } from "./MobileNav";
@@ -14,6 +16,8 @@ import { MobileNav } from "./MobileNav";
 export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
   const [modalOpen, setModalOpen] = useState(false);
+  const [colModalOpen, setColModalOpen] = useState(false);
+  const [editingColumn, setEditingColumn] = useState<{ id: string; title: string; cardCount: number } | null>(null);
   const [tagsOpen, setTagsOpen] = useState(false);
   const [activePriorities, setActivePriorities] = useState<Priority[]>([]);
   const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
@@ -63,9 +67,27 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
   const onDragEnd = useCallback(
     async (result: DropResult) => {
-      const { source, destination, draggableId } = result;
+      const { source, destination, draggableId, type } = result;
       if (!destination) return;
       if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+      if (type === "column") {
+        const newColumns = [...columns];
+        const [moved] = newColumns.splice(source.index, 1);
+        newColumns.splice(destination.index, 0, moved);
+        newColumns.forEach((c, i) => (c.position = i));
+        setColumns(newColumns);
+
+        await fetch(`/api/boards/${id}/columns/reorder`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            columnId: moved.id,
+            position: destination.index,
+          }),
+        });
+        return;
+      }
 
       const newColumns = columns.map((col) => ({ ...col, cards: [...col.cards] }));
       const sourceCol = newColumns.find((c) => c.id === source.droppableId)!;
@@ -103,7 +125,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         }),
       });
     },
-    [columns, hasFilters, activePriorities, activeTagIds]
+    [columns, id, hasFilters, activePriorities, activeTagIds]
   );
 
   return (
@@ -123,6 +145,14 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
           >
             <Plus size={13} strokeWidth={2} />
             New Card
+          </button>
+
+          <button
+            onClick={() => setColModalOpen(true)}
+            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+          >
+            <Columns3 size={13} strokeWidth={1.5} />
+            New Column
           </button>
 
           <button
@@ -153,6 +183,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <MobileNav
             onNewCard={() => setModalOpen(true)}
+            onNewColumn={() => setColModalOpen(true)}
             onTags={() => setTagsOpen(true)}
           />
         </div>
@@ -173,11 +204,20 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
       <main className="flex-1 overflow-x-auto px-6 md:px-8 pb-6 md:pb-8">
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-5 h-full after:shrink-0 after:w-px after:content-['']">
-            {filteredColumns.map((col, i) => (
-              <Column key={col.id} {...col} index={i} boardId={id} />
-            ))}
-          </div>
+          <Droppable droppableId="board" type="column" direction="horizontal">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="flex gap-5 h-full after:shrink-0 after:w-px after:content-['']"
+              >
+                {filteredColumns.map((col, i) => (
+                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </DragDropContext>
       </main>
 
@@ -192,6 +232,23 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         open={tagsOpen}
         onClose={() => setTagsOpen(false)}
       />
+
+      <CreateColumnModal
+        open={colModalOpen}
+        onClose={() => setColModalOpen(false)}
+        boardId={id}
+        onCreated={() => window.location.reload()}
+      />
+
+      {editingColumn && (
+        <EditColumnModal
+          open
+          onClose={() => setEditingColumn(null)}
+          boardId={id}
+          column={editingColumn}
+          onUpdated={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 }

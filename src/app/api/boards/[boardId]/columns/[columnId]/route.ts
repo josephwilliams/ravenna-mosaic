@@ -19,6 +19,17 @@ export async function DELETE(
   ctx: RouteContext<"/api/boards/[boardId]/columns/[columnId]">
 ) {
   const { columnId } = await ctx.params;
+
+  const cardCount = await prisma.card.count({
+    where: { columnId, deletedAt: null },
+  });
+  if (cardCount > 0) {
+    return NextResponse.json(
+      { error: "Cannot delete a column that contains cards" },
+      { status: 409 }
+    );
+  }
+
   await prisma.column.delete({ where: { id: columnId } });
   return NextResponse.json({ deleted: true });
 }

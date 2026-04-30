@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Menu, X, Plus, Tag, Archive, BookOpen, Flame } from "lucide-react";
+import { Menu, X, Plus, Columns3, Tag, Archive, BookOpen, Flame } from "lucide-react";
 
 interface MobileNavProps {
   onNewCard: () => void;
+  onNewColumn: () => void;
   onTags: () => void;
 }
 
-export function MobileNav({ onNewCard, onTags }: MobileNavProps) {
+export function MobileNav({ onNewCard, onNewColumn, onTags }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -28,6 +29,7 @@ export function MobileNav({ onNewCard, onTags }: MobileNavProps) {
 
   const items = [
     { label: "New Card", icon: Plus, action: () => { close(); onNewCard(); } },
+    { label: "New Column", icon: Columns3, action: () => { close(); onNewColumn(); } },
     { label: "Tags", icon: Tag, action: () => { close(); onTags(); } },
     { label: "Archive", icon: Archive, href: "/archive" },
     { label: "Ponderings", icon: BookOpen, href: "/ponderings" },
