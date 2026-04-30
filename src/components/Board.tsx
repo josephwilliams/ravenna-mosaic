@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
 import { Flame, Plus, Columns3, BookOpen, Archive, Tag } from "lucide-react";
-import type { BoardData, ColumnData, CardData, Priority, TagData } from "@/lib/types";
+import type { BoardData, CardData, Priority, TagData } from "@/lib/types";
 import { navItemClass } from "@/lib/styles";
 import { fetchJSON } from "@/lib/fetch";
 import { Column } from "./Column";

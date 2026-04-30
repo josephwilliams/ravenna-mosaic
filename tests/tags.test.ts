@@ -80,7 +80,7 @@ describe("PUT /api/cards/[cardId]/tags", () => {
     const tag2 = await createTestTag("TestTag2", "#00ff00");
     tagIds.push(tag2.id);
 
-    const { status, body } = await apiCall(
+    const { status } = await apiCall(
       PUT,
       buildRequest(`/api/cards/${cardId}/tags`, { method: "PUT", body: { tagIds: [tag2.id] } }),
       { cardId }

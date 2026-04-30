@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X, Plus, Columns3, Tag, Archive, BookOpen, Flame } from "lucide-react";
@@ -13,9 +13,7 @@ interface MobileNavProps {
 
 export function MobileNav({ onNewCard, onNewColumn, onTags }: MobileNavProps) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";

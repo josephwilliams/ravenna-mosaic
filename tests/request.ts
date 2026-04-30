@@ -22,7 +22,7 @@ export function buildRequest(path: string, options?: { method?: string; body?: u
   return new NextRequest(url, init);
 }
 
-export async function apiCall(handler: Function, req: NextRequest, params: Record<string, string> = {}) {
+export async function apiCall(handler: (req: NextRequest, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>, req: NextRequest, params: Record<string, string> = {}) {
   const ctx = { params: Promise.resolve(params) };
   const res = await handler(req, ctx);
   const json = await res.json();

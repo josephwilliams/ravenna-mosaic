@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Draggable } from "@hello-pangea/dnd";
@@ -18,11 +18,9 @@ interface CardProps extends CardData {
 
 export function Card({ index, boardId, columnId, ...card }: CardProps) {
   const [editing, setEditing] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const router = useRouter();
   const commentCount = card._count?.comments ?? 0;
-
-  useEffect(() => { setMounted(true); }, []);
 
   function handleCardClick(e: React.MouseEvent) {
     if ((e.target as HTMLElement).closest("button")) return;

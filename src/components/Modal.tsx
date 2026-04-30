@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { type ReactNode, useEffect, useRef, useState, useCallback } from "react";
+import { type ReactNode, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { btnPrimary, btnSecondary } from "@/lib/styles";
 
 interface ModalProps {
@@ -11,13 +11,9 @@ interface ModalProps {
 }
 
 export function Modal({ open, onClose, children }: ModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<Element | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (open) {
