@@ -81,3 +81,9 @@ Tests hit a real database (no mocks). Make sure `.env.local` is configured.
 | `pnpm db:migrate` | Run Prisma migrations |
 | `pnpm db:seed` | Seed with sample data |
 | `pnpm db:studio` | Open Prisma Studio |
+
+## TODO
+
+- Rate limiting on API routes (e.g. Vercel Edge middleware or upstash/ratelimit)
+- Input sanitization beyond Prisma's parameterized queries (additional defense-in-depth against injection)
+- Authentication and authorization

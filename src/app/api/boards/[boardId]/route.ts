@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { cardInclude } from "@/lib/queries";
 import { NextRequest } from "next/server";
-import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
 
 export async function GET(
   req: NextRequest,
@@ -11,11 +11,16 @@ export async function GET(
     const { boardId } = await ctx.params;
     const { searchParams } = req.nextUrl;
 
-    const priority = searchParams.getAll("priority");
+    const priorities = searchParams.getAll("priority");
     const tagIds = searchParams.getAll("tagId");
 
+    for (const p of priorities) {
+      const err = validatePriority(p);
+      if (err) return error(ErrorCode.VALIDATION, err);
+    }
+
     const cardWhere: Record<string, unknown> = { deletedAt: null };
-    if (priority.length > 0) cardWhere.priority = { in: priority };
+    if (priorities.length > 0) cardWhere.priority = { in: priorities };
     if (tagIds.length > 0) cardWhere.tags = { some: { tagId: { in: tagIds } } };
 
     const board = await prisma.board.findUnique({

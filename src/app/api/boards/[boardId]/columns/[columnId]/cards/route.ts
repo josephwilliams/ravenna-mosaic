@@ -10,8 +10,11 @@ export async function GET(
   try {
     const { columnId } = await ctx.params;
     const { searchParams } = req.nextUrl;
-    const skip = parseInt(searchParams.get("skip") ?? "0", 10) || 0;
-    const take = parseInt(searchParams.get("take") ?? "50", 10) || 50;
+    const skip = parseInt(searchParams.get("skip") ?? "0", 10);
+    const take = parseInt(searchParams.get("take") ?? "50", 10);
+
+    if (isNaN(skip) || skip < 0) return error(ErrorCode.VALIDATION, "skip must be a non-negative integer");
+    if (isNaN(take) || take < 1 || take > 100) return error(ErrorCode.VALIDATION, "take must be between 1 and 100");
 
     const cards = await prisma.card.findMany({
       where: { columnId, deletedAt: null },
