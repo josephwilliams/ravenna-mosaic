@@ -29,7 +29,7 @@ export function FilterBar({
   const hasFilters = activePriorities.length > 0 || activeTagIds.length > 0;
 
   return (
-    <div className="flex items-center gap-4 flex-wrap">
+    <div className="flex items-center gap-4 flex-wrap overflow-x-auto">
       <div className="flex items-center gap-1.5 text-parchment-400">
         <Filter size={12} strokeWidth={1.5} />
         <span className="text-[10px] font-body font-semibold uppercase tracking-[0.12em]">

@@ -9,6 +9,7 @@ import { Column } from "./Column";
 import { CreateCardModal } from "./CreateCardModal";
 import { TagsModal } from "./TagsModal";
 import { FilterBar } from "./FilterBar";
+import { MobileNav } from "./MobileNav";
 
 export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
@@ -107,7 +108,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
   return (
     <div className="h-full flex flex-col">
-      <header className="shrink-0 px-8 pt-8 pb-6 animate-fade-in">
+      <header className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 md:pb-6 animate-fade-in">
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <Flame size={16} className="text-parchment-700" strokeWidth={1.5} />
@@ -118,7 +119,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
           >
             <Plus size={13} strokeWidth={2} />
             New Card
@@ -126,7 +127,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <button
             onClick={() => setTagsOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
           >
             <Tag size={13} strokeWidth={1.5} />
             Tags
@@ -134,7 +135,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <Link
             href="/archive"
-            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
           >
             <Archive size={13} strokeWidth={1.5} />
             Archive
@@ -142,13 +143,18 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
           <Link
             href="/ponderings"
-            className="flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
+            className="hidden md:flex items-center gap-1.5 text-xs font-body font-medium text-parchment-500 hover:text-terracotta transition-colors"
           >
             <BookOpen size={13} strokeWidth={1.5} />
             Ponderings
           </Link>
 
           <div className="h-px flex-1 bg-gradient-to-r from-parchment-300 to-transparent" />
+
+          <MobileNav
+            onNewCard={() => setModalOpen(true)}
+            onTags={() => setTagsOpen(true)}
+          />
         </div>
 
         {availableTags.length > 0 && (
@@ -165,7 +171,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         )}
       </header>
 
-      <main className="flex-1 overflow-x-auto px-8 pb-8">
+      <main className="flex-1 overflow-x-auto px-6 md:px-8 pb-6 md:pb-8">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex gap-5 h-full">
             {filteredColumns.map((col, i) => (
