@@ -13,7 +13,7 @@ const entries: Entry[] = [
   {
     commit: "Commit 2",
     title: "The Database",
-    body: "Went with Neon Postgres for the database. Good fit for Vercel deploy and the demo. Hit an ESM bug with Prisma 7 on Node 22, so pinned to v6. Also discovered Prisma CLI ignores .env.local, so added dotenv-cli to bridge the gap. Small tax for a cleaner setup.",
+    body: "Went with Neon Postgres for the database. Good fit for Vercel deploy and the demo. Used to Supabase in recent projects and wanted to try something new. Prisma's ORM syntax is clean and expressive.",
   },
   {
     commit: "Commit 4",
