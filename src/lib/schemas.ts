@@ -22,8 +22,9 @@ export const moveSchema = z.object({
   position: z.number().int(),
 });
 
-export const stringIdsSchema = z.object({
+export const reorderCardsSchema = z.object({
   cardIds: z.array(z.string()),
+  columnId: z.string().min(1).optional(),
 });
 
 export const tagIdsSchema = z.object({

@@ -84,10 +84,24 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
 
       setColumns(newColumns);
 
-      await fetchJSON(`/api/cards/${draggableId}/move`, {
-        method: "PATCH",
-        body: { columnId: destination.droppableId, position: moved.position },
-      });
+      const reorderCalls = [
+        fetchJSON(`/api/boards/${id}/columns/${destCol.id}/cards/reorder`, {
+          method: "PATCH",
+          body: {
+            cardIds: destCol.cards.map((c) => c.id),
+            ...(sourceCol.id !== destCol.id && { columnId: destCol.id }),
+          },
+        }),
+      ];
+      if (sourceCol.id !== destCol.id) {
+        reorderCalls.push(
+          fetchJSON(`/api/boards/${id}/columns/${sourceCol.id}/cards/reorder`, {
+            method: "PATCH",
+            body: { cardIds: sourceCol.cards.map((c) => c.id) },
+          })
+        );
+      }
+      await Promise.all(reorderCalls);
     },
     [columns, id, filters.hasFilters, filters.activePriorities, filters.activeTagIds]
   );
