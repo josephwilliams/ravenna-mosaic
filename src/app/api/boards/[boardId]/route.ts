@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { cardInclude } from "@/lib/queries";
 import { NextRequest } from "next/server";
-import { success, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
+import { success, error, validatePriority, handleError, ErrorCode } from "@/lib/api";
+import { titleSchema, parseBody } from "@/lib/schemas";
 
 export async function GET(
   req: NextRequest,
@@ -54,12 +55,12 @@ export async function PATCH(
   try {
     const { boardId } = await ctx.params;
     const body = await req.json();
-    const invalid = validate(body, { title: "string" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(titleSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const board = await prisma.board.update({
       where: { id: boardId },
-      data: { title: body.title.trim() },
+      data: { title: parsed.data.title },
     });
     return success(board);
   } catch (err) {

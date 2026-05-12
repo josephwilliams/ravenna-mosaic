@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, error, handleError, ErrorCode } from "@/lib/api";
+import { stringIdsSchema, parseBody } from "@/lib/schemas";
 
 export async function PATCH(
   req: NextRequest,
@@ -9,11 +10,11 @@ export async function PATCH(
   try {
     await params;
     const body = await req.json();
-    const invalid = validate(body, { cardIds: "string[]" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(stringIdsSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     await prisma.$transaction(
-      body.cardIds.map((id: string, position: number) =>
+      parsed.data.cardIds.map((id, position) =>
         prisma.card.update({ where: { id }, data: { position } })
       )
     );

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, error, handleError, ErrorCode } from "@/lib/api";
+import { titleSchema, parseBody } from "@/lib/schemas";
 
 export async function PATCH(
   req: NextRequest,
@@ -9,12 +10,12 @@ export async function PATCH(
   try {
     const { columnId } = await ctx.params;
     const body = await req.json();
-    const invalid = validate(body, { title: "string" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(titleSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const column = await prisma.column.update({
       where: { id: columnId },
-      data: { title: body.title.trim() },
+      data: { title: parsed.data.title },
     });
     return success(column);
   } catch (err) {

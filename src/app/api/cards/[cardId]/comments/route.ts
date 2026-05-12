@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { success, created, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, created, error, handleError, ErrorCode } from "@/lib/api";
+import { commentSchema, parseBody } from "@/lib/schemas";
 
 export async function GET(
   _req: NextRequest,
@@ -25,11 +26,11 @@ export async function POST(
   try {
     const { cardId } = await ctx.params;
     const body = await req.json();
-    const invalid = validate(body, { content: "string" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(commentSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const comment = await prisma.comment.create({
-      data: { cardId, author: "Anonymous", content: body.content.trim() },
+      data: { cardId, author: "Anonymous", content: parsed.data.content },
     });
     return created(comment);
   } catch (err) {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { success, created, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, created, error, handleError, ErrorCode } from "@/lib/api";
+import { createTagSchema, parseBody } from "@/lib/schemas";
 
 export async function GET() {
   try {
@@ -16,11 +17,11 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const invalid = validate(body, { name: "string", color: "string" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(createTagSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const tag = await prisma.tag.create({
-      data: { name: body.name.trim(), color: body.color.trim() },
+      data: { name: parsed.data.name, color: parsed.data.color },
     });
     return created(tag);
   } catch (err) {

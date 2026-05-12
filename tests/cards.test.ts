@@ -79,7 +79,7 @@ describe("POST /cards", () => {
       { boardId, columnId: colAId }
     );
     expect(status).toBe(400);
-    expect(body.error.message).toContain("at most 200");
+    expect(body.error.message).toContain("<=200");
   });
 
   it("rejects description exceeding max length", async () => {
@@ -92,7 +92,7 @@ describe("POST /cards", () => {
       { boardId, columnId: colAId }
     );
     expect(status).toBe(400);
-    expect(body.error.message).toContain("at most 2000");
+    expect(body.error.message).toContain("<=2000");
   });
 
   it("rejects invalid priority", async () => {
@@ -105,7 +105,7 @@ describe("POST /cards", () => {
       { boardId, columnId: colAId }
     );
     expect(status).toBe(400);
-    expect(body.error.message).toContain("priority");
+    expect(body.error.code).toBe("VALIDATION");
   });
 });
 

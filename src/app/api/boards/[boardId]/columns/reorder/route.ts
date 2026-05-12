@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { success, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, error, handleError, ErrorCode } from "@/lib/api";
+import { moveSchema, parseBody } from "@/lib/schemas";
 
 export async function PATCH(
   req: NextRequest,
@@ -9,27 +10,27 @@ export async function PATCH(
   try {
     const { boardId } = await params;
     const body = await req.json();
-    const invalid = validate(body, { columnId: "string", position: "number" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(moveSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     await prisma.$transaction(async (tx) => {
-      const column = await tx.column.findUniqueOrThrow({ where: { id: body.columnId } });
+      const column = await tx.column.findUniqueOrThrow({ where: { id: parsed.data.columnId } });
 
-      if (body.position > column.position) {
+      if (parsed.data.position > column.position) {
         await tx.column.updateMany({
-          where: { boardId, position: { gt: column.position, lte: body.position } },
+          where: { boardId, position: { gt: column.position, lte: parsed.data.position } },
           data: { position: { decrement: 1 } },
         });
-      } else if (body.position < column.position) {
+      } else if (parsed.data.position < column.position) {
         await tx.column.updateMany({
-          where: { boardId, position: { gte: body.position, lt: column.position } },
+          where: { boardId, position: { gte: parsed.data.position, lt: column.position } },
           data: { position: { increment: 1 } },
         });
       }
 
       await tx.column.update({
-        where: { id: body.columnId },
-        data: { position: body.position },
+        where: { id: parsed.data.columnId },
+        data: { position: parsed.data.position },
       });
     });
 

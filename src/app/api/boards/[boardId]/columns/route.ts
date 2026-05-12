@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { success, created, error, validate, handleError, ErrorCode } from "@/lib/api";
+import { success, created, error, handleError, ErrorCode } from "@/lib/api";
+import { titleSchema, parseBody } from "@/lib/schemas";
 
 export async function GET(
   _req: NextRequest,
@@ -25,8 +26,8 @@ export async function POST(
   try {
     const { boardId } = await ctx.params;
     const body = await req.json();
-    const invalid = validate(body, { title: "string" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
+    const parsed = parseBody(titleSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const maxPos = await prisma.column.aggregate({
       where: { boardId },
@@ -36,7 +37,7 @@ export async function POST(
     const column = await prisma.column.create({
       data: {
         boardId,
-        title: body.title.trim(),
+        title: parsed.data.title,
         position: (maxPos._max.position ?? -1) + 1,
       },
     });

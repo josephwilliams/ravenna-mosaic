@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { success, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
+import { success, error, handleError, ErrorCode } from "@/lib/api";
+import { updateCardSchema, parseBody } from "@/lib/schemas";
 
 export async function GET(
   _req: NextRequest,
@@ -27,21 +28,16 @@ export async function PATCH(
     const { cardId } = await ctx.params;
     const body = await req.json();
 
-    const priorityErr = validatePriority(body.priority);
-    if (priorityErr) return error(ErrorCode.VALIDATION, priorityErr);
-
-    if (body.title !== undefined) {
-      const invalid = validate({ title: body.title }, { title: "string" });
-      if (invalid) return error(ErrorCode.VALIDATION, invalid);
-    }
+    const parsed = parseBody(updateCardSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const card = await prisma.card.update({
       where: { id: cardId },
       data: {
-        ...(body.title !== undefined && { title: body.title.trim() }),
-        ...(body.description !== undefined && { description: body.description?.trim() || null }),
-        ...(body.priority !== undefined && { priority: body.priority }),
-        ...(body.deletedAt !== undefined && { deletedAt: body.deletedAt }),
+        ...(parsed.data.title !== undefined && { title: parsed.data.title }),
+        ...(parsed.data.description !== undefined && { description: parsed.data.description?.trim() || null }),
+        ...(parsed.data.priority !== undefined && { priority: parsed.data.priority }),
+        ...(parsed.data.deletedAt !== undefined && { deletedAt: parsed.data.deletedAt }),
       },
     });
     return success(card);

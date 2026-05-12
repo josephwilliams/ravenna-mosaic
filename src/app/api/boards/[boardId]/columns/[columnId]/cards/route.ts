@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { cardInclude } from "@/lib/queries";
 import { NextRequest } from "next/server";
-import { success, created, error, validate, validateLength, validatePriority, handleError, ErrorCode } from "@/lib/api";
+import { success, created, error, handleError, ErrorCode } from "@/lib/api";
+import { createCardSchema, parseBody } from "@/lib/schemas";
 
 export async function GET(
   req: NextRequest,
@@ -37,14 +38,8 @@ export async function POST(
     const { columnId } = await ctx.params;
     const body = await req.json();
 
-    const invalid = validate(body, { title: "string" });
-    if (invalid) return error(ErrorCode.VALIDATION, invalid);
-
-    const lengthErr = validateLength({ description: body.description });
-    if (lengthErr) return error(ErrorCode.VALIDATION, lengthErr);
-
-    const priorityErr = validatePriority(body.priority);
-    if (priorityErr) return error(ErrorCode.VALIDATION, priorityErr);
+    const parsed = parseBody(createCardSchema, body);
+    if ("error" in parsed) return error(ErrorCode.VALIDATION, parsed.error);
 
     const maxPos = await prisma.card.aggregate({
       where: { columnId },
@@ -54,9 +49,9 @@ export async function POST(
     const card = await prisma.card.create({
       data: {
         columnId,
-        title: body.title.trim(),
-        description: body.description?.trim() || null,
-        priority: body.priority ?? "MEDIUM",
+        title: parsed.data.title,
+        description: parsed.data.description?.trim() || null,
+        priority: parsed.data.priority ?? "MEDIUM",
         position: (maxPos._max.position ?? -1) + 1,
       },
     });
