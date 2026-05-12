@@ -1,7 +1,14 @@
+interface FetchResult<T> {
+  ok: boolean;
+  status: number;
+  data: T;
+  errorMessage?: string;
+}
+
 export async function fetchJSON<T = unknown>(
   url: string,
   options?: { method?: string; body?: unknown }
-): Promise<{ ok: boolean; status: number; data: T }> {
+): Promise<FetchResult<T>> {
   const init: RequestInit = { method: options?.method ?? "GET" };
   if (options?.body) {
     init.headers = { "Content-Type": "application/json" };
@@ -9,5 +16,10 @@ export async function fetchJSON<T = unknown>(
   }
   const res = await fetch(url, init);
   const json = await res.json();
-  return { ok: res.ok, status: res.status, data: json.data };
+  return {
+    ok: res.ok,
+    status: res.status,
+    data: json.data,
+    errorMessage: json.error?.message,
+  };
 }

@@ -57,12 +57,11 @@ export function TagsModal({ open, onClose }: TagsModalProps) {
 
   async function handleDelete(tag: TagWithCount) {
     setError(null);
-    const res = await fetch(`/api/tags/${tag.id}`, { method: "DELETE" });
+    const res = await fetchJSON(`/api/tags/${tag.id}`, { method: "DELETE" });
     if (res.ok) {
       setTags((prev) => prev.filter((t) => t.id !== tag.id));
     } else {
-      const { error: err } = await res.json();
-      setError(err.message);
+      setError(res.errorMessage ?? "Failed to delete tag");
     }
   }
 
