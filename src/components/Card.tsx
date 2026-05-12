@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Draggable } from "@hello-pangea/dnd";
 import { Settings, MessageSquare } from "lucide-react";
 import type { CardData } from "@/lib/types";
+import { useHasMounted } from "@/hooks/useHasMounted";
 import { PriorityBadge, PriorityBar } from "./PriorityBadge";
 import { TagChip } from "./TagChip";
 import { EditCardModal } from "./EditCardModal";
@@ -18,7 +19,7 @@ interface CardProps extends CardData {
 
 export function Card({ index, boardId, columnId, ...card }: CardProps) {
   const [editing, setEditing] = useState(false);
-  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const mounted = useHasMounted();
   const router = useRouter();
   const commentCount = card._count?.comments ?? 0;
 
