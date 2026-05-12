@@ -75,24 +75,22 @@ export function Card({ index, boardId, columnId, ...card }: CardProps) {
                 </p>
               )}
 
-              <div className="flex items-center justify-between mt-2">
-                {card.tags.length > 0 ? (
+              {(card.tags.length > 0 || commentCount > 0) && (
+                <div className="flex items-center justify-between mt-2">
                   <div className="flex flex-wrap gap-1.5">
                     {card.tags.map(({ tag }) => (
                       <TagChip key={tag.id} name={tag.name} color={tag.color} />
                     ))}
                   </div>
-                ) : (
-                  <div />
-                )}
 
-                {commentCount > 0 && (
-                  <div className="flex items-center gap-1 text-parchment-400">
-                    <MessageSquare size={12} strokeWidth={1.5} />
-                    <span className="text-[10px] font-body font-medium">{commentCount}</span>
-                  </div>
-                )}
-              </div>
+                  {commentCount > 0 && (
+                    <div className="flex items-center gap-1 text-parchment-400">
+                      <MessageSquare size={12} strokeWidth={1.5} />
+                      <span className="text-[10px] font-body font-medium">{commentCount}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
 
