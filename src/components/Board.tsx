@@ -1,20 +1,17 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { useState, useCallback } from "react";
 import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
-import { Flame, Plus, Columns3, BookOpen, Archive, Tag } from "lucide-react";
-import type { BoardData, CardData, Priority, TagData } from "@/lib/types";
-import { navItemClass } from "@/lib/styles";
+import type { BoardData, CardData } from "@/lib/types";
 import { fetchJSON } from "@/lib/fetch";
 import { Column } from "./Column";
+import { BoardHeader } from "./BoardHeader";
 import { CreateCardModal } from "./CreateCardModal";
 import { CreateColumnModal } from "./CreateColumnModal";
 import { EditColumnModal } from "./EditColumnModal";
 import { TagsModal } from "./TagsModal";
-import { FilterBar } from "./FilterBar";
-import { MobileNav } from "./MobileNav";
 import { useBoardKeyboard } from "@/hooks/useBoardKeyboard";
+import { useBoardFilters } from "@/hooks/useBoardFilters";
 
 export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
@@ -23,78 +20,10 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [colModalOpen, setColModalOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<{ id: string; title: string; cardCount: number } | null>(null);
   const [tagsOpen, setTagsOpen] = useState(false);
-  const [activePriorities, setActivePriorities] = useState<Priority[]>([]);
-  const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
-  const [groupByUrgency, setGroupByUrgency] = useState(false);
 
-  const [availableTags, setAvailableTags] = useState<(TagData & { cardCount: number })[]>([]);
+  const filters = useBoardFilters(id, columns);
 
-  useEffect(() => {
-    fetchJSON<{ id: string; name: string; color: string; _count: { cards: number } }[]>("/api/tags")
-      .then(({ data }) =>
-        setAvailableTags(
-          data
-            .map((t) => ({ id: t.id, name: t.name, color: t.color, cardCount: t._count.cards }))
-            .sort((a, b) => b.cardCount - a.cardCount)
-        )
-      );
-  }, []);
-
-  const hasFilters = activePriorities.length > 0 || activeTagIds.length > 0;
-
-  const filteredColumns = useMemo(() => {
-    if (!hasFilters) return columns;
-    return columns.map((col) => ({
-      ...col,
-      cards: col.cards.filter((card) => {
-        if (activePriorities.length > 0 && !activePriorities.includes(card.priority)) return false;
-        if (activeTagIds.length > 0 && !card.tags.some(({ tag }) => activeTagIds.includes(tag.id))) return false;
-        return true;
-      }),
-    }));
-  }, [columns, activePriorities, activeTagIds, hasFilters]);
-
-  useBoardKeyboard(filteredColumns);
-
-  function togglePriority(p: Priority) {
-    setActivePriorities((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
-    );
-  }
-
-  function toggleTag(id: string) {
-    setActiveTagIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  }
-
-  const priorityRank: Record<Priority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-
-  async function sortByUrgency() {
-    const sorted = columns.map((col) => ({
-      ...col,
-      cards: [...col.cards]
-        .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority])
-        .map((c, i) => ({ ...c, position: i })),
-    }));
-    setColumns(sorted);
-    setGroupByUrgency(true);
-
-    await Promise.all(
-      sorted.map((col) =>
-        fetchJSON(`/api/boards/${id}/columns/${col.id}/cards/reorder`, {
-          method: "PATCH",
-          body: { cardIds: col.cards.map((c) => c.id) },
-        })
-      )
-    );
-  }
-
-  function clearFilters() {
-    setActivePriorities([]);
-    setActiveTagIds([]);
-    setGroupByUrgency(false);
-  }
+  useBoardKeyboard(filters.filteredColumns);
 
   async function loadMore(columnId: string, skip: number) {
     const { data } = await fetchJSON<CardData[]>(`/api/boards/${id}/columns/${columnId}/cards?skip=${skip}&take=5`);
@@ -134,10 +63,10 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
       const cardIndex = sourceCol.cards.findIndex((c) => c.id === draggableId);
       const [moved] = sourceCol.cards.splice(cardIndex, 1);
 
-      if (hasFilters) {
+      if (filters.hasFilters) {
         const filteredDest = destCol.cards.filter((card) => {
-          if (activePriorities.length > 0 && !activePriorities.includes(card.priority)) return false;
-          if (activeTagIds.length > 0 && !card.tags.some(({ tag }) => activeTagIds.includes(tag.id))) return false;
+          if (filters.activePriorities.length > 0 && !filters.activePriorities.includes(card.priority)) return false;
+          if (filters.activeTagIds.length > 0 && !card.tags.some(({ tag }) => filters.activeTagIds.includes(tag.id))) return false;
           return true;
         });
         const anchorCard = filteredDest[destination.index];
@@ -164,84 +93,30 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         body: { columnId: destination.droppableId, position: moved.position },
       });
     },
-    [columns, id, hasFilters, activePriorities, activeTagIds]
+    [columns, id, filters.hasFilters, filters.activePriorities, filters.activeTagIds]
   );
+
+  function openNewCard(colId?: string) {
+    setModalColumnId(colId);
+    setModalOpen(true);
+  }
 
   return (
     <div className="h-full flex flex-col">
-      <header className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 md:pb-6 animate-fade-in">
-        <div className="flex items-center gap-5">
-          <div className="flex items-center gap-2">
-            <Flame size={16} className="text-parchment-700" strokeWidth={1.5} />
-            <h1 className="font-display text-xl font-semibold text-parchment-800">
-              {title}
-            </h1>
-          </div>
-
-          <button
-            onClick={() => { setModalColumnId(undefined); setModalOpen(true); }}
-            className={navItemClass}
-          >
-            <Plus size={13} strokeWidth={2} />
-            New Card
-          </button>
-
-          <button
-            onClick={() => setColModalOpen(true)}
-            className={navItemClass}
-          >
-            <Columns3 size={13} strokeWidth={1.5} />
-            New Column
-          </button>
-
-          <button
-            onClick={() => setTagsOpen(true)}
-            className={navItemClass}
-          >
-            <Tag size={13} strokeWidth={1.5} />
-            Tags
-          </button>
-
-          <Link
-            href="/archive"
-            className={navItemClass}
-          >
-            <Archive size={13} strokeWidth={1.5} />
-            Archive
-          </Link>
-
-          <Link
-            href="/ponderings"
-            className={navItemClass}
-          >
-            <BookOpen size={13} strokeWidth={1.5} />
-            Ponderings
-          </Link>
-
-          <div className="h-px flex-1 bg-gradient-to-r from-parchment-300 to-transparent" />
-
-          <MobileNav
-            onNewCard={() => { setModalColumnId(undefined); setModalOpen(true); }}
-            onNewColumn={() => setColModalOpen(true)}
-            onTags={() => setTagsOpen(true)}
-          />
-        </div>
-
-        {availableTags.length > 0 && (
-          <div className="mt-4">
-            <FilterBar
-              availableTags={availableTags}
-              activePriorities={activePriorities}
-              activeTagIds={activeTagIds}
-              groupByUrgency={groupByUrgency}
-              onTogglePriority={togglePriority}
-              onToggleTag={toggleTag}
-              onToggleGroupByUrgency={sortByUrgency}
-              onClear={clearFilters}
-            />
-          </div>
-        )}
-      </header>
+      <BoardHeader
+        title={title}
+        availableTags={filters.availableTags}
+        activePriorities={filters.activePriorities}
+        activeTagIds={filters.activeTagIds}
+        groupByUrgency={filters.groupByUrgency}
+        onNewCard={() => openNewCard()}
+        onNewColumn={() => setColModalOpen(true)}
+        onTags={() => setTagsOpen(true)}
+        onTogglePriority={filters.togglePriority}
+        onToggleTag={filters.toggleTag}
+        onToggleGroupByUrgency={() => filters.sortByUrgency(setColumns)}
+        onClearFilters={filters.clearFilters}
+      />
 
       <main className="flex-1 overflow-x-auto px-6 md:px-8 pb-6 md:pb-8">
         <DragDropContext onDragEnd={onDragEnd}>
@@ -252,8 +127,8 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
                 {...provided.droppableProps}
                 className="flex gap-5 h-full after:shrink-0 after:w-px after:content-['']"
               >
-                {filteredColumns.map((col, i) => (
-                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} onLoadMore={loadMore} onAddCard={(colId) => { setModalColumnId(colId); setModalOpen(true); }} />
+                {filters.filteredColumns.map((col, i) => (
+                  <Column key={col.id} {...col} index={i} boardId={id} onEdit={setEditingColumn} onLoadMore={loadMore} onAddCard={(colId) => openNewCard(colId)} />
                 ))}
                 {provided.placeholder}
               </div>
