@@ -7,9 +7,7 @@ import { fetchJSON } from "@/lib/fetch";
 import { Column } from "./Column";
 import { BoardHeader } from "./BoardHeader";
 import { CreateCardModal } from "./CreateCardModal";
-import { CreateColumnModal } from "./CreateColumnModal";
 import { EditColumnModal } from "./EditColumnModal";
-import { TagsModal } from "./TagsModal";
 import { useBoardKeyboard } from "@/hooks/useBoardKeyboard";
 import { useBoardFilters } from "@/hooks/useBoardFilters";
 
@@ -17,9 +15,7 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [columns, setColumns] = useState(initialColumns);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalColumnId, setModalColumnId] = useState<string | undefined>();
-  const [colModalOpen, setColModalOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<{ id: string; title: string; cardCount: number } | null>(null);
-  const [tagsOpen, setTagsOpen] = useState(false);
 
   const filters = useBoardFilters(id, columns);
 
@@ -104,18 +100,18 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
   return (
     <div className="h-full flex flex-col">
       <BoardHeader
+        boardId={id}
         title={title}
         availableTags={filters.availableTags}
         activePriorities={filters.activePriorities}
         activeTagIds={filters.activeTagIds}
         groupByUrgency={filters.groupByUrgency}
         onNewCard={() => openNewCard()}
-        onNewColumn={() => setColModalOpen(true)}
-        onTags={() => setTagsOpen(true)}
         onTogglePriority={filters.togglePriority}
         onToggleTag={filters.toggleTag}
         onToggleGroupByUrgency={() => filters.sortByUrgency(setColumns)}
         onClearFilters={filters.clearFilters}
+        onEditColumn={setEditingColumn}
       />
 
       <main className="flex-1 overflow-x-auto px-6 md:px-8 pb-6 md:pb-8">
@@ -143,18 +139,6 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
         boardId={id}
         columns={columns}
         defaultColumnId={modalColumnId}
-      />
-
-      <TagsModal
-        open={tagsOpen}
-        onClose={() => setTagsOpen(false)}
-      />
-
-      <CreateColumnModal
-        open={colModalOpen}
-        onClose={() => setColModalOpen(false)}
-        boardId={id}
-        onCreated={() => window.location.reload()}
       />
 
       {editingColumn && (
