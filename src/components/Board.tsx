@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
 import { Flame, Plus, Columns3, BookOpen, Archive, Tag } from "lucide-react";
@@ -27,17 +27,18 @@ export function Board({ id, title, columns: initialColumns }: BoardData) {
   const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
   const [groupByUrgency, setGroupByUrgency] = useState(false);
 
-  const availableTags = useMemo(() => {
-    const tagMap = new Map<string, TagData>();
-    for (const col of columns) {
-      for (const card of col.cards) {
-        for (const { tag } of card.tags) {
-          tagMap.set(tag.id, tag);
-        }
-      }
-    }
-    return Array.from(tagMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [columns]);
+  const [availableTags, setAvailableTags] = useState<(TagData & { cardCount: number })[]>([]);
+
+  useEffect(() => {
+    fetchJSON<{ id: string; name: string; color: string; _count: { cards: number } }[]>("/api/tags")
+      .then(({ data }) =>
+        setAvailableTags(
+          data
+            .map((t) => ({ id: t.id, name: t.name, color: t.color, cardCount: t._count.cards }))
+            .sort((a, b) => b.cardCount - a.cardCount)
+        )
+      );
+  }, []);
 
   const hasFilters = activePriorities.length > 0 || activeTagIds.length > 0;
 
