@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { cardInclude } from "@/lib/queries";
 import { NextRequest } from "next/server";
-import { success, created, error, validate, validatePriority, handleError, ErrorCode } from "@/lib/api";
+import { success, created, error, validate, validateLength, validatePriority, handleError, ErrorCode } from "@/lib/api";
 
 export async function GET(
   req: NextRequest,
@@ -39,6 +39,9 @@ export async function POST(
 
     const invalid = validate(body, { title: "string" });
     if (invalid) return error(ErrorCode.VALIDATION, invalid);
+
+    const lengthErr = validateLength({ description: body.description });
+    if (lengthErr) return error(ErrorCode.VALIDATION, lengthErr);
 
     const priorityErr = validatePriority(body.priority);
     if (priorityErr) return error(ErrorCode.VALIDATION, priorityErr);

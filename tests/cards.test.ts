@@ -69,6 +69,32 @@ describe("POST /cards", () => {
     expect(body.error.code).toBe("VALIDATION");
   });
 
+  it("rejects title exceeding max length", async () => {
+    const { status, body } = await apiCall(
+      POST,
+      buildRequest(`/api/boards/${boardId}/columns/${colAId}/cards`, {
+        method: "POST",
+        body: { title: "x".repeat(201) },
+      }),
+      { boardId, columnId: colAId }
+    );
+    expect(status).toBe(400);
+    expect(body.error.message).toContain("at most 200");
+  });
+
+  it("rejects description exceeding max length", async () => {
+    const { status, body } = await apiCall(
+      POST,
+      buildRequest(`/api/boards/${boardId}/columns/${colAId}/cards`, {
+        method: "POST",
+        body: { title: "Valid", description: "x".repeat(2001) },
+      }),
+      { boardId, columnId: colAId }
+    );
+    expect(status).toBe(400);
+    expect(body.error.message).toContain("at most 2000");
+  });
+
   it("rejects invalid priority", async () => {
     const { status, body } = await apiCall(
       POST,

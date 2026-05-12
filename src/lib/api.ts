@@ -35,6 +35,14 @@ export function error(code: ErrorCode, message: string) {
   );
 }
 
+const MAX_LENGTHS: Record<string, number> = {
+  title: 200,
+  name: 100,
+  content: 2000,
+  description: 2000,
+  color: 20,
+};
+
 export function validate(
   fields: Record<string, unknown>,
   rules: Record<string, "string" | "string?" | "number" | "string[]">
@@ -44,6 +52,18 @@ export function validate(
     if (rule === "string") {
       if (typeof value !== "string" || value.trim().length === 0)
         return `${key} is required`;
+      const max = MAX_LENGTHS[key];
+      if (max && value.length > max)
+        return `${key} must be at most ${max} characters`;
+    }
+    if (rule === "string?") {
+      if (value !== undefined && typeof value !== "string")
+        return `${key} must be a string`;
+      if (typeof value === "string") {
+        const max = MAX_LENGTHS[key];
+        if (max && value.length > max)
+          return `${key} must be at most ${max} characters`;
+      }
     }
     if (rule === "number") {
       if (typeof value !== "number" || !Number.isFinite(value))
@@ -53,6 +73,16 @@ export function validate(
       if (!Array.isArray(value) || !value.every((v) => typeof v === "string"))
         return `${key} must be an array of strings`;
     }
+  }
+  return null;
+}
+
+export function validateLength(fields: Record<string, unknown>): string | null {
+  for (const [key, value] of Object.entries(fields)) {
+    if (typeof value !== "string") continue;
+    const max = MAX_LENGTHS[key];
+    if (max && value.length > max)
+      return `${key} must be at most ${max} characters`;
   }
   return null;
 }
